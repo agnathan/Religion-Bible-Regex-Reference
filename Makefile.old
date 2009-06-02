@@ -14,7 +14,7 @@
 #     AUTHOR => q[Daniel Holmlund <holmlund.dev@gmail.com>]
 #     NAME => q[Religion::Bible::Regex::Reference]
 #     PL_FILES => {  }
-#     PREREQ_PM => { Test::More=>q[0], Test::Base=>q[0], Religion::Bible::Regex::Config=>q[0], version=>q[0], Religion::Bible::Regex::Regex=>q[0] }
+#     PREREQ_PM => { Test::More=>q[0], Test::Base=>q[0], Religion::Bible::Regex::Config=>q[0], version=>q[0], Religion::Bible::Regex::Builder=>q[0] }
 #     VERSION_FROM => q[lib/Religion/Bible/Regex/Reference.pm]
 #     clean => { FILES=>q[Religion-Bible-Regex-Reference-*] }
 #     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[gz] }
@@ -474,15 +474,15 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                Religion-Bible-Regex-Reference' >> META_new.yml
 	$(NOECHO) $(ECHO) 'version:             v0.8' >> META_new.yml
-	$(NOECHO) $(ECHO) 'abstract:            [One line description of module'\''s purpose here]' >> META_new.yml
+	$(NOECHO) $(ECHO) 'abstract:             this Perl object represents a Biblical reference along with the functions that can be applied to it.' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:              ' >> META_new.yml
 	$(NOECHO) $(ECHO) '    - Daniel Holmlund <holmlund.dev@gmail.com>' >> META_new.yml
 	$(NOECHO) $(ECHO) 'generated_by:        ExtUtils::MakeMaker version 6.42' >> META_new.yml
 	$(NOECHO) $(ECHO) 'distribution_type:   module' >> META_new.yml
 	$(NOECHO) $(ECHO) 'requires:     ' >> META_new.yml
+	$(NOECHO) $(ECHO) '    Religion::Bible::Regex::Builder: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Religion::Bible::Regex::Config: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Religion::Bible::Regex::Regex: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Test::Base:                    0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Test::More:                    0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    version:                       0' >> META_new.yml
@@ -758,11 +758,11 @@ testdb_static :: testdb_dynamic
 ppd :
 	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="v0,8,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <ABSTRACT>[One line description of module'\''s purpose here]</ABSTRACT>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '    <ABSTRACT> this Perl object represents a Biblical reference along with the functions that can be applied to it.</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Daniel Holmlund &lt;holmlund.dev@gmail.com&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Religion-Bible-Regex-Builder" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Religion-Bible-Regex-Config" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Religion-Bible-Regex-Regex" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Test-Base" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Test-More" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="version" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd

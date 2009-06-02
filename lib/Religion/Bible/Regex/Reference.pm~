@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 package Religion::Bible::Regex::Reference;
+
 use strict;
 use warnings;
 
@@ -42,6 +43,8 @@ use version; our $VERSION = qv('0.8');
 #     book_list_separateur => '; ',
 # );
 
+# These constants are defined in several places and probably should be moved to a common file
+# Move these to Constants.pm
 use constant BOOK    => 'BOOK';
 use constant CHAPTER => 'CHAPTER';
 use constant VERSE   => 'VERSE'; 
@@ -49,7 +52,7 @@ use constant UNKNOWN => 'UNKNOWN';
 use constant TRUE => 1;
 use constant FALSE => 0;
 
-sub new {    
+sub new {
     my ($class, $regex, $config) = @_;
     my ($self) = {};
     bless $self, $class;
@@ -58,82 +61,121 @@ sub new {
 #    $self->{'reference_config'} = new Religion::Bible::Regex::Config($config->get_formatting_configurations, \%configuration_defaults);
     return $self;
 }
+# sub _initialize_default_configuration {
+#     my $self = shift; 
+#     my $defaults = shift; 
 
-sub _initialize_default_configuration {
-    my $self = shift; 
-    my $defaults = shift; 
+#     while ( my ($key, $value) = each(%{$defaults}) ) {    
+#        $self->set($key, $value) unless defined($self->{mainconfig}{$key});  
+#     }
+# }
 
-    while ( my ($key, $value) = each(%{$defaults}) ) {    
-       $self->set($key, $value) unless defined($self->{mainconfig}{$key});  
-    }
-}
-# These get functions are here so that I can eliminate silent errrors.
-# If the variable asked for is not found we 'confess' it
-sub reference_config {
-  my $self = shift;
-  confess "reference_config is not defined in ReferenceBiblique::Versification\n" unless defined($self->{reference_config});
-  return $self->{'reference_config'}; 
-}
+# Returns a reference to a Religion::Bible::Regex::Builder object.
 
-sub regex {
+# Subroutines related to getting information
+sub get_regexes {
   my $self = shift;
   confess "regex is not defined in ReferenceBiblique::Versification\n" unless defined($self->{regex});
   return $self->{regex};
 }
 
-sub config {
+# Returns a reference to a Religion::Bible::Regex::Config object.
+sub get_configuration {
   my $self = shift;
   confess "config is not defined in ReferenceBiblique::Versification\n" unless defined($self->{config});
   return $self->{config};
 }
 
-sub reference {
-  my $self = shift;
-  confess "reference is not defined in ReferenceBiblique::Versification\n" unless defined($self->{reference});
-  return $self->{reference};
+sub get_reference_hash {
+    return shift->{'reference'};
+}
+# sub get_formatting_configuration_hash {
+#   my $self = shift;
+#   confess "reference is not defined in ReferenceBiblique::Versification\n" unless defined($self->{config}->get_formatting_configurations);
+#   return $self->{config}->get_formatting_configurations;
+# }
+
+# sub get_versification_configuration_hash {
+#   my $self = shift;
+#   confess "reference_config is not defined in ReferenceBiblique::Versification\n" unless defined($self->{config}->get_versification_configurations);
+#   return $self->{config}->get_versification_configurations;
+# }
+
+sub key {
+    return shift->{'reference'}{'key'},
 }
 
+
+# set: 
+sub formatted_books {
+    my $reference = shift;
+    my $ref = $reference->get_reference_hash;
+    my ($l, $l2) = ('','');
+
+    my $book_format = $reference->get_configuration->get('reference', 'book_format');
+
+    if ($reference->is_explicit && (_non_empty($book_format))) {
+        if ($book_format eq 'CANONICAL_NAME') {
+            $l  = $ref->{book};
+            $l2 = $ref->{book2};
+        } elsif ($book_format eq 'ABBREVIATION') {
+            $l  = $ref->{abbreviation};
+            $l2 = $ref->{abbreviation2};
+        } elsif ($book_format eq 'ORIGINAL') { 
+            if ($ref->{bookname_type} eq 'CANONICAL_NAME') {
+                $l  = $ref->{book};
+                $l2 = $ref->{book2};
+            } elsif ($ref->{bookname_type} eq 'ABBREVIATION') {
+                $l  = $ref->{abbreviation};
+                $l2 = $ref->{abbreviation2};
+            } 
+        } else {
+            carp "Book_format is undefined.  Using the ORIGINAL book name or abbreviation found\n";
+        } 
+    } else {  
+        return ('','');
+    }
+
+    return ($l, $l2);
+} 
+
+# Subroutines related to setting information
 sub set {
     my ($self, $r, $oldref) = @_;
-    my $context = $oldref->reference if (non_empty($oldref));
-    my $refconfig = $self->reference_config;
-    my $regex = $self->regex;
+    my $context = (_non_empty($oldref)) ? $oldref->get_reference_hash : undef;
+#    my $refconfig = $self->reference_config;
+    my $regex = $self->get_regexes;
     my %reference = ();
 
-    # Il faut avoir un integer moin de 150, le plus grand chiffre comme chapitre dans la Bible
-    #warn "Livre n'est pas valide\n" unless is_livre_valid($r->{l});
-    #warn "Chapitre doit être une chiffre moin de 150: \"$r->{c}\"\n" unless is_chapitre_valid($r->{c});
-    #warn "Verset doit être une chiffre moin de 176: \"$r->{v}\"\n" unless is_verset_valid($r->{v});
-
     # Set the Versification that was assumed when the reference was read in and parsed
-    $reference{versification} = $self->config->get('versification', 'source');
+#    $reference{versification} = $self->config->get('versification', 'source');
     
     # Voici les paramètres par défaut pour une référence
-    $reference{book} = setor( $regex->book($r->{l}), $context->{book} );
-    $reference{abbreviation} = setor( $regex->abbreviation($r->{l}), $context->{abbreviation} );
-    $reference{key} = setor( $regex->key($r->{l}), $context->{key} );
-    $reference{l}  = setor( $r->{l}, $context->{l} );
-    $reference{c}  = setor( $r->{c}, $context->{c} );
-    $reference{cr} = setor( $r->{cr} );
-    $reference{v}  = setor( $r->{v}  );
-    $reference{vr} = setor( $r->{vr} );
+    $reference{book} = _setor( $regex->book($r->{l}), $context->{book} );
+    $reference{abbreviation} = _setor( $regex->abbreviation($r->{l}), $context->{abbreviation} );
+    $reference{key} = _setor( $regex->key($r->{l}), $context->{key} );
+    $reference{l}  = _setor( $r->{l}, $context->{l} );
+    $reference{c}  = _setor( $r->{c}, $context->{c} );
+    $reference{cr} = _setor( $r->{cr} );
+    $reference{v}  = _setor( $r->{v}  );
+    $reference{vr} = _setor( $r->{vr} );
 
     # If the context reference has l2, c2 or cr parts, use them as the context
     # For example, when using the reference 'Ps 34:2-35:3' and combining it with verse '5'
     # the result should be 'Ps 35:5'  The c2 part (35) is used rather than the c part (34).
     if ($self->state_is_verset($r)) {
-        $reference{c} = setor( $context->{c2}, $context->{cr}, $reference{c} );
-        $reference{book} = setor( $context->{book2}, $context->{book} );
-        $reference{abbreviation} = setor( $context->{abbreviation2}, $context->{abbreviation} );
-        $reference{key} = setor( $context->{key2}, $context->{key} );
-        $reference{l}  = setor( $context->{l2},  $context->{l} ); 
+        $reference{c} = _setor( $context->{c2}, $context->{cr}, $reference{c} );
+        $reference{book} = _setor( $context->{book2}, $context->{book} );
+        $reference{abbreviation} = _setor( $context->{abbreviation2}, $context->{abbreviation} );
+        $reference{key} = _setor( $context->{key2}, $context->{key} );
+        $reference{l}  = _setor( $context->{l2},  $context->{l} ); 
     }
 
     if ($self->state_is_chapitre($r)) {
-        $reference{book} = setor( $context->{book2}, $context->{book} );
-        $reference{abbreviation} = setor( $context->{abbreviation2}, $context->{abbreviation} );
-        $reference{key} = setor( $context->{key2}, $context->{key} );
-        $reference{l}  = setor( $context->{l2}, $context->{l} ); 
+        $reference{book} = _setor( $context->{book2}, $context->{book} );
+        $reference{abbreviation} = _setor( $context->{abbreviation2}, $context->{abbreviation} );
+        $reference{key}  = _setor( $context->{key2}, $context->{key} );
+        $reference{l}    = _setor( $context->{l2}, $context->{l} ); 
     }
 
     # If this is a reference with a book with only one chapter like 'Jude 10', then the '10' which
@@ -145,13 +187,13 @@ sub set {
 	$reference{c} = 1;
     }
 
-    $reference{cvs}  = (defined($r->{cvs})  ? $r->{cvs}  : '');
-    $reference{cvs2} = (defined($r->{cvs2}) ? $r->{cvs2} : '');
+    # $reference{cvs}  = (defined($r->{cvs})  ? $r->{cvs}  : '');
+    # $reference{cvs2} = (defined($r->{cvs2}) ? $r->{cvs2} : '');
 
-    $reference{book2} = setor( $regex->book($r->{l2}) );
-    $reference{abbreviation2} = setor( $regex->abbreviation($r->{l2}) );
-    $reference{key2} = setor( $regex->key($r->{l2}), $context->{key2} );
-    $reference{l2}  = setor( $r->{l2} ); 
+    $reference{book2} = _setor( $regex->book($r->{l2}) );
+    $reference{abbreviation2} = _setor( $regex->abbreviation($r->{l2}) );
+    $reference{key2} = _setor( $regex->key($r->{l2}), $context->{key2} );
+    $reference{l2}  = _setor( $r->{l2} ); 
     
     $reference{c2}  = (defined($r->{c2})  ? $r->{c2}  : '');
     $reference{cr2} = (defined($r->{cr2}) ? $r->{cr2} : '');
@@ -160,9 +202,9 @@ sub set {
 
     # Les Espaces for the first reference
     $reference{hs} = (defined($r->{hs})   ? $r->{hs} : '');
-    $reference{a}  = (non_empty($r->{a})) ? $r->{a}  : (defined($context->{a}) ? $context->{a} : '');
-    $reference{b}  = (non_empty($r->{b})) ? $r->{b}  : '';
-    $reference{d}  = (non_empty($r->{d})) ? $r->{d}  : '';
+    $reference{a}  = (_non_empty($r->{a})) ? $r->{a}  : (defined($context->{a}) ? $context->{a} : '');
+    $reference{b}  = (_non_empty($r->{b})) ? $r->{b}  : '';
+    $reference{d}  = (_non_empty($r->{d})) ? $r->{d}  : '';
 
     # Les Espaces for the second reference
     $reference{hs2} = (defined($r->{hs2}) ? $r->{hs2} : '');
@@ -170,37 +212,37 @@ sub set {
     $reference{b2}  = (defined($r->{b2})  ? $r->{b2}   : '');
     $reference{d2}  = (defined($r->{d2})  ? $r->{d2}   : '');
 
-#    ($reference{c}, $reference{dash}, $reference{c2}) = split(/([-–−])/, $r->{cr})  if (non_empty($r->{cr})); 
-#    ($reference{v}, $reference{dash}, $reference{v2}) = split(/([-–−])/, $r->{vr})  if (non_empty($r->{vr})); 
+#    ($reference{c}, $reference{dash}, $reference{c2}) = split(/([-–?])/, $r->{cr})  if (_non_empty($r->{cr})); 
+#    ($reference{v}, $reference{dash}, $reference{v2}) = split(/([-–?])/, $r->{vr})  if (_non_empty($r->{vr})); 
 
     if(defined($reference{book2}) && $reference{book2} =~ m/$regex->{'livres_avec_un_chapitre'}/) {
 	$reference{v2} =  $reference{c2} if ($reference{v2} eq '');
 	$reference{c2} = 1;
     }
 
-    $reference{cvs} = (non_empty($reference{c}) && non_empty($reference{v})) ?
-	non_empty($refconfig->get('cvs')) ? 
-	$refconfig->get('cvs') :
-	non_empty($reference{cvs}) ?
-	$reference{cvs} :
-	':'
-	: '';
+    # $reference{cvs} = (_non_empty($reference{c}) && _non_empty($reference{v})) ?
+    # 	_non_empty($refconfig->get('cvs')) ? 
+    # 	$refconfig->get('cvs') :
+    # 	_non_empty($reference{cvs}) ?
+    # 	$reference{cvs} :
+    # 	':'
+    # 	: '';
 
-    $reference{cvs2} = (non_empty($reference{c2}) && non_empty($reference{v2})) ?
-	non_empty($refconfig->get('cvs')) ? 
-	$refconfig->get('cvs') :
-	non_empty($reference{cvs2}) ?
-	$reference{cvs2} :
-	':'
-	: '';
+    # $reference{cvs2} = (_non_empty($reference{c2}) && _non_empty($reference{v2})) ?
+    # 	_non_empty($refconfig->get('cvs')) ? 
+    # 	$refconfig->get('cvs') :
+    # 	_non_empty($reference{cvs2}) ?
+    # 	$reference{cvs2} :
+    # 	':'
+    # 	: '';
 
-    $reference{dash}   = (non_empty($reference{c2}) || non_empty($reference{v2}))  ? '-' : ''; 
-    $reference{cdash}  = (non_empty($reference{c})  && non_empty($reference{cr}))  ? '-' : ''; 
-    $reference{vdash}  = (non_empty($reference{v})  && non_empty($reference{vr}))  ? '-' : ''; 
-    $reference{cdash2} = (non_empty($reference{c2}) && non_empty($reference{cr2})) ? '-' : ''; 
-    $reference{vdash2} = (non_empty($reference{v2}) && non_empty($reference{vr2})) ? '-' : ''; 
+    # $reference{dash}   = (_non_empty($reference{c2}) || _non_empty($reference{v2}))  ? '-' : ''; 
+    # $reference{cdash}  = (_non_empty($reference{c})  && _non_empty($reference{cr}))  ? '-' : ''; 
+    # $reference{vdash}  = (_non_empty($reference{v})  && _non_empty($reference{vr}))  ? '-' : ''; 
+    # $reference{cdash2} = (_non_empty($reference{c2}) && _non_empty($reference{cr2})) ? '-' : ''; 
+    # $reference{vdash2} = (_non_empty($reference{v2}) && _non_empty($reference{vr2})) ? '-' : ''; 
 
-    # $reference{uses_complete_book_name} = $regex->uses_complete_book_name(setor($reference{l})) || $context->ref_config->get('uses_complete_book_name');
+    # $reference{uses_complete_book_name} = $regex->uses_complete_book_name(_setor($reference{l})) || $context->ref_config->get('uses_complete_book_name');
     
     # 'uses_complete_book_name' specifies whether a reference uses an ABBREVIATION like 'Mt', a COMPLETE_NAME
     # like 'Matthieu' or NONE like 'chapters 5-6'
@@ -210,7 +252,7 @@ sub set {
 
     # If not empty then use  $reference{l}'s type
     my $type = $regex->bookname_type($reference{l});
-    if ( non_empty($type) ) {
+    if ( _non_empty($type) ) {
 	$reference{bookname_type} = $type;
     } elsif ( defined($context) ) {
 	# Otherwise is $context is defined uses it's booktype
@@ -219,6 +261,169 @@ sub set {
 
     $self->{'reference'} = \%reference; 
 }
+
+
+##################################################################################
+# Reference Parsing
+##################################################################################
+sub parse {
+    my $self = shift; 
+    my $token = shift;
+    my $context = shift;
+    my $state = shift;
+
+    my $r = $self->get_regexes;
+    my $spaces = '[\s ]*';
+
+    # type: LCVLCV
+    if ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({hs=>$1, l=>$2, a=>$3, c=>$4, b=>$5, cvs=>$6, d=>$7, v=>$8, e=>$9, 
+                dash=>$10, 
+                hs2=>$11, l2=>$12, a2=>$13, c2=>$14, b2=>$15, cvs2 =>$16, d2=>$17, v2=>$18, ts=>$19}, $context);
+    } 
+    
+    # type: LCCVV
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/x) {
+    $state = 'match';
+        $self->set({ hs=>$1,
+                     l=>$2,a=>$3,c=>$4,cdash=>$6,cr=>$8,
+                     cvs=>$10,hs2=>$11,v=>$12,vdash=>$14,vr=>$16 }, $context);
+    }
+
+    # type: LCVCV
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+    $state = 'match';
+        $self->set({ hs=>$1,
+                     l=>$2,a=>$3,c=>$4,cvs=>$6,v=>$8,
+                     dash=>$10,hs2=>$11,c2=>$12,cvs2=>$14,v2=>$16 }, $context);
+    }
+
+    # type: LCCV
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({hs=>$1, l=>$2, a=>$3, c=>$4, b=>$5, 
+                cdash=>$6, 
+                cr=>$8, b2=>$9, cvs =>$10, d=>$11, v=>$12}, $context);
+    }  
+
+    # type: LCVV
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({l=>$2,a=>$3,c=>$4,b=>$5,cvs=>$6,d=>$7,v=>$8,vdash=>$10,vr=>$12}, $context);
+    }
+
+    # type: LCV
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({l=>$2, a=>$3, c=>$4, b=>$5, cvs=>$6, d=>$7, v=>$8}, $context);
+    } 
+
+    # type: LCC
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)/x) {
+        $state = 'match';
+        $self->set({l=>$2,a=>$3,c=>$4,cdash=>$6,cr=>$8,b=>'',cvs=>'',d=>'',v=>''}, $context);
+    }
+
+    # type: LC
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {
+        $state = 'match';
+        $self->set({l=>$2, a=>$3, c=>$4, b=>'', cvs=>'', d=>'', v=>''}, $context);
+    } else {
+            $self->parse_chapitre($token, $context, $state);
+    } 
+    return $self;
+}
+
+sub parse_chapitre {
+	my $self = shift; 
+    my $token = shift;
+    my $context = shift;
+    my $state = shift;
+	my $r = $self->regex;
+    
+	my $spaces = '[\s ]*';
+
+    # type: CVCV
+    if ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({c=>$2, b=>$3, cvs=>$4, d=>$5, v=>$6, dash=>$8, c2=>$10, cvs2=>$12, v2=>$14}, $context);
+    } 
+
+    # type: CCV
+    elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({c=>$2, b=>$3, dash=>$4, d=>$5, c2=>$6, e=>$7, cvs=>$8, f=>$9, v2=>$10}, $context);
+    } 
+
+    # type: CVV
+    elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/x) {
+        $state = 'match';
+        $self->set({c=>$2, b=>$3, cvs=>$4, d=>$5, v=>$6, vdash=>$8, vr=>$10}, $context);
+    } 
+
+    # type: CV
+    elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)($r->{'cv_separateur'})([\s ]*)($r->{'verset'})([\s ]*)/x) {
+        $state = 'match';
+        $self->set({c=>$2, b=>$3, cvs=>$4, d=>$5, v=>$6}, $context);
+    }
+
+    # type: CC
+    elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)/ && $state eq CHAPTER) {
+    # elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)/) {
+        $state = 'match';
+        $self->set({c=>$2, b=>'', cdash=>$4, cr=>$6, d=>'', v=>''}, $context);
+    } 
+
+    # type: C
+    elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)/ && $state eq CHAPTER) {
+    # elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)/) {
+        $state = 'match';
+        $self->set({c=>$2, b=>'', cvs=>'', d=>'', v=>''}, $context);
+    } 
+
+    # Cet un Verset
+    else {
+        $self->parse_verset($token, $context, $state);
+    }
+}
+
+sub parse_verset {
+    my $self = shift; 
+    my $token = shift;
+    my $context = shift;
+    my $state = shift;
+    my $r = $self->regex;
+
+    my $spaces = '[\s ]*';
+
+    unless (defined($state)) {
+        carp "\n\n$token: " .__LINE__ ."\n\n";
+    }
+    
+    # type: VV
+    if ($token =~ m/($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/ && $state eq VERSE) {
+        $state = 'match';
+        $self->set({v=>$2, vdash=> $4, vr=>$6}, $context);
+    }
+    
+    # type: V
+    elsif ($token =~ m/([\s ]*)($r->{'verset'})([\s ]*)/ && $state eq VERSE) {
+        $state = 'match';
+        $self->set({v=>$2}, $context);
+    } 
+
+    # Error
+    else {
+        $self->set({type => 'Error'}, $context);
+    }
+}
+
+################################################################################
+# Format Section
+# This section provides a default normalize form that is useful for various
+# operations with references
+################################################################################
 
 
 
@@ -234,83 +439,208 @@ sub set {
 # 
 ##################################################################################
 sub state_is_verset {
-	my $self = shift;
-	my $r = shift || $self->reference;
+    my $self = shift;
+    my $r = shift || $self->reference;
     
-    return non_empty($r->{v}) && !non_empty($r->{c}) && !$self->is_explicit($r);
+    return _non_empty($r->{v}) && !_non_empty($r->{c}) && !$self->is_explicit($r);
 }
 
 sub state_is_chapitre {
-	my $self = shift;
-	my $r = shift || $self->reference;
+    my $self = shift;
+    my $r = shift || $self->reference;
     
-    return non_empty($r->{c}) && !$self->is_explicit($r);
+    return _non_empty($r->{c}) && !$self->is_explicit($r);
 }
 
 sub state_is_book {
-	my $self = shift;
+    my $self = shift;
     return $self->is_explicit;
 }
 
-sub non_empty {
+sub is_explicit {
+    my $self = shift;
+    my $ref = shift || $self->get_reference_hash;
+    
+    my $any = _non_empty($ref->{l}) || _non_empty($ref->{book}) || _non_empty($ref->{abbreviation}) || _non_empty($ref->{key});
+
+    # Explicit reference must have a book and a chapter
+    return ($any && _non_empty($ref->{c}));
+}
+
+########################################################################
+# Helper Functions
+#
+sub _non_empty {
     my $value = shift;
     return (defined($value) && $value ne '');
 }  
+
+# Returns the first _non_empty value or ''
+sub _setor {
+    foreach my $v (@_) {
+        return $v if _non_empty($v);
+    }
+    
+    # if no value is given the default should be a empty string
+    return '';
+}
 
 1; # Magic true value required at end of module
 __END__
 
 =head1 NAME
 
-Religion::Bible::Regex::Reference - [One line description of module's purpose here]
+Religion::Bible::Regex::Reference -  this Perl object represents a Biblical reference along with the functions that can be applied to it.
 
 
 =head1 VERSION
 
-This document describes Religion::Bible::Regex::Reference version 0.0.1
+This document describes Religion::Bible::Regex::Reference version 0.8
 
 
 =head1 SYNOPSIS
 
-    use Religion::Bible::Regex::Reference;
+=over 4
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-  
-  
+  use Religion::Bible::Regex::Config;
+  use Religion::Bible::Regex::Builder;
+  use Religion::Bible::Regex::Reference;
+
+  # $yaml_config_file is either a YAML string or the path to a YAML file
+  $yaml_config_file = 'config.yml';
+
+  my $c = new Religion::Bible::Regex::Config($yaml_config_file);
+  my $r = new Religion::Bible::Regex::Builder($c);
+  my $ref = new Religion::Bible::Regex::Reference($r, $c);
+    
+  $ref->parse('Ge 1:1');
+
+=back
+
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
+This class is meant as a building block to enable people and publishing houses 
+to build tools for processing documents which contain Bible references.
 
+This is the main class for storing state information about a Bible reference and
+can be used to build scripts that perform a variety of useful operations.  
+For example, when preparing a Biblical commentary in electronic format a publishing 
+house can save a lot of time and manual labor by creating scripts that do 
+the following:
+
+=over 4
+
+=item * Automatically find and tag Bible references
+
+=item * Find invalid Bible references
+
+=item * Check that the abbreviations used are consistent throughout the entire book.
+
+=item * Create log files of biblical references that need to be reviewed by a person.
+
+=back
+
+This class is meant to be a very general-purpose so that any type of tool that needs to manipulate Bible references can use it.
+
+
+=head1 Bible Reference Types
+
+Bible references can be classified into a few different patterns.
+
+Since this code was originally written and commented in French, we've retained
+the French abbreviations for these different Bible reference types. 
+
+=over 4
+
+    'L' stands for 'Livre'    ('Book' in English)
+    'C' stands for 'Chapitre' ('Chapter' in English)
+    'V' stands for 'Verset'   ('Verse' in English)
+
+=back
+
+Here are the different Bible reference types with an example following each one:
+
+=over 4
+
+    # Explicit Bible Reference Types
+    LCVLCV Ge 1:1-Ex 1:1
+    LCVCV  Ge 1:1-2:1
+    LCCV   Ge 1-2:5
+    LCVV   Ge 1:2-5
+    LCV    Ge 1:1
+    LCC    Ge 1-12
+    LC     Ge 1        
+            
+    # Implicit Bible Reference Types
+    CVCV   1:1-2:1
+    CCV    1-2:5
+    CVV    1:2-5
+    CV     1:1
+    CC     1-12
+    C      1
+    VV     1-5
+    V      1
+
+=back
+
+=head2 Explicit and Implicit Bible Reference Types	
+
+We say the Bible reference is explicit when it has enough information within the 
+reference to identify an exact location within the Bible. See above for examples.
+
+We say that a Bible reference is implicit when the reference itself does not 
+contain enough information to find its location in the Bible. often times within 
+a commentary we will find implicit Bible references that use the context of the text
+to identify the Bible reference.
+
+    in Chapter 4
+    in verse 17
+    see 4:17
+    as we see in chapter 5
 
 =head1 INTERFACE 
 
 =head2 new
-    Creates a new Religion::Bible::Regex::Reference.
 
-    Requires two parameters a Religion::Bible::Regex::Config object
-    and a Religion::Bible::Regex::Regex object
+Creates a new Religion::Bible::Regex::Reference. Requires two parameters a Religion::Bible::Regex::Config object and a Religion::Bible::Regex::Regex object
 
-=head2 config
-=head2 reference_config
-=head2 regex
+=head2 get_configuration
+
+Returns the Religion::Bible::Regex::Config object used by this reference.
+
+=head2 get_regexes
+
+Returns the Religion::Bible::Regex::Builder object used by this reference.
+
+=head2 get_reference_hash
+
+Returns the hash that contains all of the parts of the current Bible reference.
+
+=head2 is_explicit
+
+Returns true if all the information is there to reference an exact verse or verses in the Bible.
 
 =head2 set
-    Requires a hash of values to initalize the Bible reference
-    Optional argument a previous reference which can provide context
-    for initializing a reference
+
+Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference
 
 =head2 state_is_verset
-    Returns true if the current the state is VERSE
+
+Returns true if the current the state is VERSE
+
 =head2 state_is_chapitre
-    Returns true if the current the state is CHAPTER
+
+Returns true if the current the state is CHAPTER
 
 =head2 state_is_book   
-    Returns true if the current the state is BOOK
+
+Returns true if the current the state is BOOK
+
+=head2 parse
+
+=head2 parse_chapitre
+
+=head2 parse_verset
 
 =head1 DIAGNOSTICS
 
@@ -334,7 +664,6 @@ This document describes Religion::Bible::Regex::Reference version 0.0.1
 
 =back
 
-
 =head1 CONFIGURATION AND ENVIRONMENT
 
 =for author to fill in:
@@ -346,17 +675,15 @@ This document describes Religion::Bible::Regex::Reference version 0.0.1
   
 Religion::Bible::Regex::Reference requires no configuration files or environment variables.
 
-
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
+=over 4
 
-None.
+=item * Religion::Bible::Regex::Config
 
+=item * Religion::Bible::Regex::Builder
+
+=back
 
 =head1 INCOMPATIBILITIES
 
@@ -399,27 +726,3 @@ Copyright (c) 2009, Daniel Holmlund C<< <holmlund.dev@gmail.com> >>. All rights 
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
-
-=head1 DISCLAIMER OF WARRANTY
-
-BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
-EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
-ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
-YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
-NECESSARY SERVICING, REPAIR, OR CORRECTION.
-
-IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
-LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
-OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
-THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
-RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
-FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
-SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.

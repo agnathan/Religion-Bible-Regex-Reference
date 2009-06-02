@@ -1,14 +1,20 @@
 use t::TestConfig;
 use Data::Dumper;
-use utf8;
+
 plan tests => 1 * blocks();
+
+# filters {
+#     init   => [eval],
+#     result => [eval]
+# };
 
 run {
     my $block = shift;
     my $c = new Religion::Bible::Regex::Config($block->yaml); 
     my $r = new Religion::Bible::Regex::Builder($c);
     my $ref = new Religion::Bible::Regex::Reference($c, $r);
-    $ref->set($block->init);
+    $ref->parse($block->init, $block->state);
+    my $key = $ref->key;
     my $hash = $ref->{'reference'};
 #    print Dumper $hash;
     my $result = $block->result;
@@ -37,8 +43,8 @@ books:
 regex:
   livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
 
---- init eval
-{b=>'Ge',s2=>' ',c=>'1',cvs=>':',v=>'1', dash=>'-',b2=>'Ex',s7=>' ',c2=>'2',v2=>'5'}
+--- init chomp
+Ge 1:1-Ex 2:5
 --- result eval
 {
     'data' => {
@@ -85,8 +91,8 @@ books:
       Book: Exode
       Abbreviation: Ex
 
---- init eval
-{b=>'Ge',s2=>' ',c=>'1', dash=>'-',b2=>'Ex',s7=>' ',c2=>'2',cvs=>':',v2=>'5'}
+--- init chomp
+Ge 1-Ex 2:5
 --- result eval 
 {
     'data' => {
@@ -132,8 +138,8 @@ books:
       Book: Exode
       Abbreviation: Ex
 
---- init eval
-{b=>'Ge',s2=>' ',c=>'1', dash=>'-',b2=>'Ex',s7=>' ',c2=>'2'}
+--- init chomp
+Ge 1-Ex 2
 --- result eval
 {
     'data' => {
@@ -169,8 +175,8 @@ books:
       Book: Genèse
       Abbreviation: Ge
 
---- init eval
-{b=>'Ge', s2=>' ', c=>'1'}
+--- init chomp
+Ge 1
 --- result eval
 {
     'data' => {
@@ -195,10 +201,9 @@ books:
       Abbreviation: ['Ge']
     Normalized: 
       Book: Genèse
-      Abbreviation: Ge
-    
---- init eval
-{b=>'Ge',s2=>' ',c=>'1',cvs=>':',v=>'1', dash=>'-',c2=>'2',v2=>'5'}
+      Abbreviation: Ge    
+--- init chomp
+Ge 1:1-2:5
 --- result eval
 {
     'data' => {
@@ -234,8 +239,8 @@ books:
     Normalized: 
       Book: Genèse
       Abbreviation: Ge
---- init eval
-{b=>'Ge',s2=>' ',c=>'1', dash=>'-',c2=>'2',cvs=>':',v2=>'5'}
+--- init chomp
+Ge 1-2:5
 --- result eval 
 {
     'data' => {
@@ -270,9 +275,8 @@ books:
     Normalized: 
       Book: Genèse
       Abbreviation: Ge
-
---- init eval
-{b=>'Ge',s2=>' ',c=>'1', dash=>'-',c2=>'2'}
+--- init chomp
+Ge 1-2
 --- result eval
 {
     'data' => {
@@ -304,9 +308,8 @@ books:
     Normalized: 
       Book: Genèse
       Abbreviation: Ge
-
---- init eval
-{b=>'Ge', s2=>' ', c=>'1'}
+--- init chomp
+Ge 1
 --- result eval
 {
     'data' => {
@@ -325,8 +328,10 @@ books:
 === Parse CVCV - 1:1-2:5
 --- yaml
 ---
---- init eval
-{c=>'1',cvs=>':',v=>'1', dash=>'-',c2=>'2',v2=>'5'}
+--- init chomp
+1:1-2:5
+--- state chomp
+CHAPTER
 --- result eval
 {
     'data' => {
@@ -358,8 +363,10 @@ books:
       Book: Genèse
       Abbreviation: Ge
 
---- init eval
-{c=>'1', dash=>'-',c2=>'2',cvs=>':',v2=>'5'}
+--- init chomp
+1-2:5
+--- state chomp
+CHAPTER
 --- result eval
 {
     'data' => {
@@ -380,8 +387,10 @@ books:
 === Parse CC - 1-2
 --- yaml
 ---
---- init eval
-{c=>'1', dash=>'-',c2=>'2'}
+--- init chomp
+1-2
+--- state chomp
+CHAPTER
 --- result eval
 {
     'data' => {
@@ -399,8 +408,10 @@ books:
 === Parse C - 2
 --- yaml
 ---
---- init eval
-{c=>'1'}
+--- init chomp
+1
+--- state chomp
+CHAPTER
 --- result eval
 {
     'data' => {
@@ -413,8 +424,10 @@ books:
 === Parse VV - 1-2
 --- yaml
 ---
---- init eval
-{v=>'1', dash=>'-',v2=>'2'}
+--- init chomp
+1-2
+--- state chomp
+VERSE
 --- result eval
 {
     'data' => {
@@ -432,8 +445,10 @@ books:
 === Parse V - 2
 --- yaml
 ---
---- init eval
-{v=>'1'}
+--- init chomp
+1
+--- state chomp
+VERSE
 --- result eval
 {
     'data' => {
@@ -456,9 +471,10 @@ books:
       Abbreviation: Ju
 regex:
   livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
-
---- init eval
-{b=>'Jude',s2=>' ',v=>'4'}
+--- init chomp
+Jude 4
+--- state chomp
+VERSE
 --- result eval
 {
     'data' => {
@@ -475,7 +491,43 @@ regex:
 	's2' => ' ',
     },
     'info' => {
-        'cvs' =>':',
+	'cvs' => ':'
     }
-
 }
+=== Parse a book that has only one chapter - Jude 1:4
+--- yaml
+---
+books:
+  65: 
+    Match:
+      Book: ['Jude']
+      Abbreviation: ['Ju']
+    Normalized: 
+      Book: Jude
+      Abbreviation: Ju
+regex:
+  livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
+--- init chomp
+Jude 1:4
+--- state chomp
+VERSE
+--- result eval
+{
+    'data' => {
+        'key' => '65',
+        'c' => '1',
+        'v' => '4',
+    },
+    'original' => {
+        'b'  => 'Jude',
+        'c' => '1',
+        'v'  => '4',
+    },
+    'spaces' => {
+        's2' => ' ',
+    },
+    'info' => {
+        'cvs' => ':'
+    }
+}
+

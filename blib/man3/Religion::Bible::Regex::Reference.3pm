@@ -124,39 +124,158 @@
 .\" ========================================================================
 .\"
 .IX Title "Religion::Bible::Regex::Reference 3pm"
-.TH Religion::Bible::Regex::Reference 3pm "2009-05-13" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH Religion::Bible::Regex::Reference 3pm "2009-06-01" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH "NAME"
-Religion::Bible::Regex::Reference \- [One line description of module's purpose here]
+Religion::Bible::Regex::Reference \-  this Perl object represents a Biblical reference along with the functions that can be applied to it.
 .SH "VERSION"
 .IX Header "VERSION"
-This document describes Religion::Bible::Regex::Reference version 0.0.1
+This document describes Religion::Bible::Regex::Reference version 0.8
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-.Vb 1
-\&    use Religion::Bible::Regex::Reference;
+.Vb 3
+\&  use Religion::Bible::Regex::Config;
+\&  use Religion::Bible::Regex::Builder;
+\&  use Religion::Bible::Regex::Reference;
+\&
+\&  # $yaml_config_file is either a YAML string or the path to a YAML file
+\&  $yaml_config_file = \*(Aqconfig.yml\*(Aq;
+\&
+\&  my $c = new Religion::Bible::Regex::Config($yaml_config_file);
+\&  my $r = new Religion::Bible::Regex::Builder($c);
+\&  my $ref = new Religion::Bible::Regex::Reference($r, $c);
+\&    
+\&  $ref\->parse(\*(AqGe 1:1\*(Aq);
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
+This class is meant as a building block to enable people and publishing houses 
+to build tools for processing documents which contain Bible references.
+.PP
+This is the main class for storing state information about a Bible reference and
+can be used to build scripts that perform a variety of useful operations.  
+For example, when preparing a Biblical commentary in electronic format a publishing 
+house can save a lot of time and manual labor by creating scripts that do 
+the following:
+.IP "\(bu" 4
+Automatically find and tag Bible references
+.IP "\(bu" 4
+Find invalid Bible references
+.IP "\(bu" 4
+Check that the abbreviations used are consistent throughout the entire book.
+.IP "\(bu" 4
+Create log files of biblical references that need to be reviewed by a person.
+.PP
+This class is meant to be a very general-purpose so that any type of tool that needs to manipulate Bible references can use it.
+.SH "Bible Reference Types"
+.IX Header "Bible Reference Types"
+Bible references can be classified into a few different patterns.
+.PP
+Since this code was originally written and commented in French, we've retained
+the French abbreviations for these different Bible reference types.
+.Sp
+.Vb 3
+\&    \*(AqL\*(Aq stands for \*(AqLivre\*(Aq    (\*(AqBook\*(Aq in English)
+\&    \*(AqC\*(Aq stands for \*(AqChapitre\*(Aq (\*(AqChapter\*(Aq in English)
+\&    \*(AqV\*(Aq stands for \*(AqVerset\*(Aq   (\*(AqVerse\*(Aq in English)
+.Ve
+.PP
+Here are the different Bible reference types with an example following each one:
+.Sp
+.Vb 8
+\&    # Explicit Bible Reference Types
+\&    LCVLCV Ge 1:1\-Ex 1:1
+\&    LCVCV  Ge 1:1\-2:1
+\&    LCCV   Ge 1\-2:5
+\&    LCVV   Ge 1:2\-5
+\&    LCV    Ge 1:1
+\&    LCC    Ge 1\-12
+\&    LC     Ge 1        
+\&            
+\&    # Implicit Bible Reference Types
+\&    CVCV   1:1\-2:1
+\&    CCV    1\-2:5
+\&    CVV    1:2\-5
+\&    CV     1:1
+\&    CC     1\-12
+\&    C      1
+\&    VV     1\-5
+\&    V      1
+.Ve
+.SS "Explicit and Implicit Bible Reference Types"
+.IX Subsection "Explicit and Implicit Bible Reference Types"
+We say the Bible reference is explicit when it has enough information within the 
+reference to identify an exact location within the Bible. See above for examples.
+.PP
+We say that a Bible reference is implicit when the reference itself does not 
+contain enough information to find its location in the Bible. often times within 
+a commentary we will find implicit Bible references that use the context of the text
+to identify the Bible reference.
+.PP
+.Vb 4
+\&    in Chapter 4
+\&    in verse 17
+\&    see 4:17
+\&    as we see in chapter 5
+.Ve
 .SH "INTERFACE"
 .IX Header "INTERFACE"
-.SS "new Creates a new Religion::Bible::Regex::Reference."
-.IX Subsection "new Creates a new Religion::Bible::Regex::Reference."
-.Vb 2
-\&    Requires two parameters a Religion::Bible::Regex::Config object
-\&    and a Religion::Bible::Regex::Regex object
-.Ve
-.SS "get_configuration =head2 get_regexes =head2 is_explicit"
-.IX Subsection "get_configuration =head2 get_regexes =head2 is_explicit"
-.SS "set Requires a hash of values to initalize the Bible reference Optional argument a previous reference which can provide context for initializing a reference"
-.IX Subsection "set Requires a hash of values to initalize the Bible reference Optional argument a previous reference which can provide context for initializing a reference"
-.SS "state_is_verset Returns true if the current the state is \s-1VERSE\s0 =head2 state_is_chapitre Returns true if the current the state is \s-1CHAPTER\s0"
-.IX Subsection "state_is_verset Returns true if the current the state is VERSE =head2 state_is_chapitre Returns true if the current the state is CHAPTER"
-.SS "state_is_book Returns true if the current the state is \s-1BOOK\s0"
-.IX Subsection "state_is_book Returns true if the current the state is BOOK"
+.SS "new"
+.IX Subsection "new"
+Creates a new Religion::Bible::Regex::Reference. Requires two parameters a Religion::Bible::Regex::Config object and a Religion::Bible::Regex::Regex object
+.SS "get_configuration"
+.IX Subsection "get_configuration"
+Returns the Religion::Bible::Regex::Config object used by this reference.
+.SS "get_regexes"
+.IX Subsection "get_regexes"
+Returns the Religion::Bible::Regex::Builder object used by this reference.
+.SS "get_reference_hash"
+.IX Subsection "get_reference_hash"
+Returns the hash that contains all of the parts of the current Bible reference.
+.SS "is_explicit"
+.IX Subsection "is_explicit"
+Returns true if all the information is there to reference an exact verse or verses in the Bible.
+.SS "set"
+.IX Subsection "set"
+.SS "key =head2 c =head2 v"
+.IX Subsection "key =head2 c =head2 v"
+.SS "key2 =head2 c2 =head2 v2"
+.IX Subsection "key2 =head2 c2 =head2 v2"
+.SS "ob =head2 ob2 =head2 oc =head2 oc2 =head2 ov =head2 ov2"
+.IX Subsection "ob =head2 ob2 =head2 oc =head2 oc2 =head2 ov =head2 ov2"
+.SS "s1 =head2 s2 =head2 s3 =head2 s4 =head2 s5 =head2 s6 =head2 s7 =head2 s8 =head2 s9"
+.IX Subsection "s1 =head2 s2 =head2 s3 =head2 s4 =head2 s5 =head2 s6 =head2 s7 =head2 s8 =head2 s9"
+.SS "book =head2 book2 =head2 abbreviation =head2 abbreviation2 =head2 cvs =head2 dash"
+.IX Subsection "book =head2 book2 =head2 abbreviation =head2 abbreviation2 =head2 cvs =head2 dash"
+.SS "set_key =head2 set_c =head2 set_v"
+.IX Subsection "set_key =head2 set_c =head2 set_v"
+.SS "set_key2 =head2 set_c2 =head2 set_v2"
+.IX Subsection "set_key2 =head2 set_c2 =head2 set_v2"
+.SS "set_b =head2 set_b2 =head2 set_oc =head2 set_oc2 =head2 set_ov =head2 set_ov2 =head2 set_cvs =head2 set_dash"
+.IX Subsection "set_b =head2 set_b2 =head2 set_oc =head2 set_oc2 =head2 set_ov =head2 set_ov2 =head2 set_cvs =head2 set_dash"
+.SS "set_s1 =head2 set_s2 =head2 set_s3 =head2 set_s4 =head2 set_s5 =head2 set_s6 =head2 set_s7 =head2 set_s8 =head2 set_s9"
+.IX Subsection "set_s1 =head2 set_s2 =head2 set_s3 =head2 set_s4 =head2 set_s5 =head2 set_s6 =head2 set_s7 =head2 set_s8 =head2 set_s9"
+.SS "abbreviation2book =head2 abbreviation2key =head2 book2abbreviation =head2 book2key =head2 book_type =head2 formatted_book =head2 formatted_book2 =head2 key2abbreviation =head2 key2book =head2 reference =head2 set_b =head2 set_b2 =head2 set_cvs =head2 set_dash =head2 set_s10 =head2 setold =head3 normalize"
+.IX Subsection "abbreviation2book =head2 abbreviation2key =head2 book2abbreviation =head2 book2key =head2 book_type =head2 formatted_book =head2 formatted_book2 =head2 key2abbreviation =head2 key2book =head2 reference =head2 set_b =head2 set_b2 =head2 set_cvs =head2 set_dash =head2 set_s10 =head2 setold =head3 normalize"
+Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference
+.SS "state_is_verset"
+.IX Subsection "state_is_verset"
+Returns true if the current the state is \s-1VERSE\s0
+.SS "state_is_chapitre"
+.IX Subsection "state_is_chapitre"
+Returns true if the current the state is \s-1CHAPTER\s0
+.SS "state_is_book"
+.IX Subsection "state_is_book"
+Returns true if the current the state is \s-1BOOK\s0
+.SS "begin_interval_reference =head2 	has_interval =head2 parse"
+.IX Subsection "begin_interval_reference =head2 	has_interval =head2 parse"
+.SS "parse_chapitre"
+.IX Subsection "parse_chapitre"
+.SS "parse_verset"
+.IX Subsection "parse_verset"
 .SH "DIAGNOSTICS"
 .IX Header "DIAGNOSTICS"
 .ie n .IP """Error message here, perhaps with %s placeholders""" 4
@@ -174,7 +293,10 @@ This document describes Religion::Bible::Regex::Reference version 0.0.1
 Religion::Bible::Regex::Reference requires no configuration files or environment variables.
 .SH "DEPENDENCIES"
 .IX Header "DEPENDENCIES"
-None.
+.IP "\(bu" 4
+Religion::Bible::Regex::Config
+.IP "\(bu" 4
+Religion::Bible::Regex::Builder
 .SH "INCOMPATIBILITIES"
 .IX Header "INCOMPATIBILITIES"
 None reported.
@@ -194,25 +316,3 @@ Copyright (c) 2009, Daniel Holmlund \f(CW\*(C`<holmlund.dev@gmail.com>\*(C'\fR. 
 .PP
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See perlartistic.
-.SH "DISCLAIMER OF WARRANTY"
-.IX Header "DISCLAIMER OF WARRANTY"
-\&\s-1BECAUSE\s0 \s-1THIS\s0 \s-1SOFTWARE\s0 \s-1IS\s0 \s-1LICENSED\s0 \s-1FREE\s0 \s-1OF\s0 \s-1CHARGE\s0, \s-1THERE\s0 \s-1IS\s0 \s-1NO\s0 \s-1WARRANTY\s0
-\&\s-1FOR\s0 \s-1THE\s0 \s-1SOFTWARE\s0, \s-1TO\s0 \s-1THE\s0 \s-1EXTENT\s0 \s-1PERMITTED\s0 \s-1BY\s0 \s-1APPLICABLE\s0 \s-1LAW\s0. \s-1EXCEPT\s0 \s-1WHEN\s0
-\&\s-1OTHERWISE\s0 \s-1STATED\s0 \s-1IN\s0 \s-1WRITING\s0 \s-1THE\s0 \s-1COPYRIGHT\s0 \s-1HOLDERS\s0 \s-1AND/OR\s0 \s-1OTHER\s0 \s-1PARTIES\s0
-\&\s-1PROVIDE\s0 \s-1THE\s0 \s-1SOFTWARE\s0 \*(L"\s-1AS\s0 \s-1IS\s0\*(R" \s-1WITHOUT\s0 \s-1WARRANTY\s0 \s-1OF\s0 \s-1ANY\s0 \s-1KIND\s0, \s-1EITHER\s0
-\&\s-1EXPRESSED\s0 \s-1OR\s0 \s-1IMPLIED\s0, \s-1INCLUDING\s0, \s-1BUT\s0 \s-1NOT\s0 \s-1LIMITED\s0 \s-1TO\s0, \s-1THE\s0 \s-1IMPLIED\s0
-\&\s-1WARRANTIES\s0 \s-1OF\s0 \s-1MERCHANTABILITY\s0 \s-1AND\s0 \s-1FITNESS\s0 \s-1FOR\s0 A \s-1PARTICULAR\s0 \s-1PURPOSE\s0. \s-1THE\s0
-\&\s-1ENTIRE\s0 \s-1RISK\s0 \s-1AS\s0 \s-1TO\s0 \s-1THE\s0 \s-1QUALITY\s0 \s-1AND\s0 \s-1PERFORMANCE\s0 \s-1OF\s0 \s-1THE\s0 \s-1SOFTWARE\s0 \s-1IS\s0 \s-1WITH\s0
-\&\s-1YOU\s0. \s-1SHOULD\s0 \s-1THE\s0 \s-1SOFTWARE\s0 \s-1PROVE\s0 \s-1DEFECTIVE\s0, \s-1YOU\s0 \s-1ASSUME\s0 \s-1THE\s0 \s-1COST\s0 \s-1OF\s0 \s-1ALL\s0
-\&\s-1NECESSARY\s0 \s-1SERVICING\s0, \s-1REPAIR\s0, \s-1OR\s0 \s-1CORRECTION\s0.
-.PP
-\&\s-1IN\s0 \s-1NO\s0 \s-1EVENT\s0 \s-1UNLESS\s0 \s-1REQUIRED\s0 \s-1BY\s0 \s-1APPLICABLE\s0 \s-1LAW\s0 \s-1OR\s0 \s-1AGREED\s0 \s-1TO\s0 \s-1IN\s0 \s-1WRITING\s0
-\&\s-1WILL\s0 \s-1ANY\s0 \s-1COPYRIGHT\s0 \s-1HOLDER\s0, \s-1OR\s0 \s-1ANY\s0 \s-1OTHER\s0 \s-1PARTY\s0 \s-1WHO\s0 \s-1MAY\s0 \s-1MODIFY\s0 \s-1AND/OR\s0
-\&\s-1REDISTRIBUTE\s0 \s-1THE\s0 \s-1SOFTWARE\s0 \s-1AS\s0 \s-1PERMITTED\s0 \s-1BY\s0 \s-1THE\s0 \s-1ABOVE\s0 \s-1LICENCE\s0, \s-1BE\s0
-\&\s-1LIABLE\s0 \s-1TO\s0 \s-1YOU\s0 \s-1FOR\s0 \s-1DAMAGES\s0, \s-1INCLUDING\s0 \s-1ANY\s0 \s-1GENERAL\s0, \s-1SPECIAL\s0, \s-1INCIDENTAL\s0,
-\&\s-1OR\s0 \s-1CONSEQUENTIAL\s0 \s-1DAMAGES\s0 \s-1ARISING\s0 \s-1OUT\s0 \s-1OF\s0 \s-1THE\s0 \s-1USE\s0 \s-1OR\s0 \s-1INABILITY\s0 \s-1TO\s0 \s-1USE\s0
-\&\s-1THE\s0 \s-1SOFTWARE\s0 (\s-1INCLUDING\s0 \s-1BUT\s0 \s-1NOT\s0 \s-1LIMITED\s0 \s-1TO\s0 \s-1LOSS\s0 \s-1OF\s0 \s-1DATA\s0 \s-1OR\s0 \s-1DATA\s0 \s-1BEING\s0
-\&\s-1RENDERED\s0 \s-1INACCURATE\s0 \s-1OR\s0 \s-1LOSSES\s0 \s-1SUSTAINED\s0 \s-1BY\s0 \s-1YOU\s0 \s-1OR\s0 \s-1THIRD\s0 \s-1PARTIES\s0 \s-1OR\s0 A
-\&\s-1FAILURE\s0 \s-1OF\s0 \s-1THE\s0 \s-1SOFTWARE\s0 \s-1TO\s0 \s-1OPERATE\s0 \s-1WITH\s0 \s-1ANY\s0 \s-1OTHER\s0 \s-1SOFTWARE\s0), \s-1EVEN\s0 \s-1IF\s0
-\&\s-1SUCH\s0 \s-1HOLDER\s0 \s-1OR\s0 \s-1OTHER\s0 \s-1PARTY\s0 \s-1HAS\s0 \s-1BEEN\s0 \s-1ADVISED\s0 \s-1OF\s0 \s-1THE\s0 \s-1POSSIBILITY\s0 \s-1OF\s0
-\&\s-1SUCH\s0 \s-1DAMAGES\s0.

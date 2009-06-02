@@ -13,7 +13,7 @@ run {
     my $block = shift;
     my $c = new Religion::Bible::Regex::Config($block->yaml); 
     my $r = new Religion::Bible::Regex::Builder($c);
-    my $ref = new Religion::Bible::Regex::Reference($r, $c);
+    my $ref = new Religion::Bible::Regex::Reference($c, $r);
 
     is ref($ref->get_configuration), 'Religion::Bible::Regex::Config';
     is ref($ref->get_regexes), 'Religion::Bible::Regex::Builder';
