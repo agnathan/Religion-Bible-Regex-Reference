@@ -1,5 +1,5 @@
 use t::TestConfig;
-#use utf8;
+use utf8;
 use Data::Dumper;
 no warnings;
 

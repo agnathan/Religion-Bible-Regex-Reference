@@ -72,7 +72,57 @@ Ge 1:1-Ex 2:5
 	'dash' => '-',
     }
 }
-=== Parse LCLCV - Ge 1-Ex 2:5
+=== Parse LCVLCV - Ge 1:1-Ex 2:5
+--- yaml
+---
+books:
+  1: 
+    Match:
+      Book: ['Genèse', 'Genese']
+      Abbreviation: ['Ge']
+    Normalized: 
+      Book: Genèse
+      Abbreviation: Ge
+  2: 
+    Match:
+      Book: ['Exode']
+      Abbreviation: ['Ex']
+    Normalized: 
+      Book: Exode
+      Abbreviation: Ex
+regex:
+  livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
+
+--- init chomp
+Ge 1:1-Ex 2:5
+--- result eval
+{
+    'data' => {
+	'key' => '1',
+	'c' => '1',
+	'v' => '1',
+	'key2' => '2',
+	'c2' => '2',
+	'v2' => '5',
+    },
+    'original' => {
+	'b'  => 'Ge',
+	'c'  => '1',
+	'v'  => '1',
+	'b2' => 'Ex',	    
+	'c2' => '2',
+	'v2' => '5',
+    },
+    'spaces' => {
+	's2' => ' ',
+	's7' => ' ',
+    },
+    'info' => {
+	'cvs' =>':',
+	'dash' => '-',
+    }
+}
+=== Parse LCVLC - Ge 1:5-Ex 2
 --- yaml
 ---
 books:
@@ -92,21 +142,21 @@ books:
       Abbreviation: Ex
 
 --- init chomp
-Ge 1-Ex 2:5
+Ge 1:5-Ex 2
 --- result eval 
 {
     'data' => {
 	'key' => '1',
 	'c' => '1',
+	'v' => '5',
 	'key2' => '2',
 	'c2' => '2',
-	'v2' => '5',
     },
     'original' => {
 	'b' => 'Ge',
 	'c' => '1',
+	'v' => '5',
 	'b2' => 'Ex',
-	'v2' => '5',
 	'c2' => '2'
     },
     'spaces' => {

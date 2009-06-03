@@ -718,6 +718,11 @@ sub normalize {
 #              'v. 1' has its verse part defined. So its context is 'verset' 
 # 
 ##################################################################################
+sub n { 
+    my $self = shift;
+    return $self->normalize;
+}
+
 sub state_is_verset {
     my $self = shift;
     my $r = shift || $self->reference;
@@ -735,6 +740,14 @@ sub state_is_chapitre {
 sub state_is_book {
     my $self = shift;
     return $self->is_explicit;
+}
+
+sub state {
+    my $self = shift;
+    return 'BOOK'    if $self->state_is_book;
+    return 'CHAPTER' if $self->state_is_chapitre;
+    return 'VERSE'   if $self->state_is_verset;
+    return 'UNKNOWN';
 }
 
 sub is_explicit {
@@ -784,6 +797,8 @@ sub end_interval_reference {
     } else {
 	$c = $self->oc2;
     }
+    
+    return unless (_non_empty($b) || _non_empty($c) || _non_empty($self->ov2));
 
     $ret->set({ b => $b,
 		c => $c, 
@@ -794,6 +809,130 @@ sub end_interval_reference {
 
     return $ret;
 }
+
+sub interval {
+    my $r1 = shift;
+    my $r2 = shift;
+    
+    # References must not be empty
+    return unless (_non_empty($r1));
+    return unless (_non_empty($r2));
+
+    # To be comparable both references must have the same state
+    # ex. 'Ge 1:1' may not be compared to 'chapter 2' or 'v. 4'
+    unless ($r1->state eq $r2->state) {
+	carp "Attempted to compare two reference that do no have the same state: " . $r1->normalize . " and " . $r2->normalize . "\n";
+	return;
+    }
+    
+    my $min = $r1->begin_interval_reference->min($r1->end_interval_reference, $r2->begin_interval_reference, $r2->end_interval_reference);
+    my $max = $r1->begin_interval_reference->max($r1->end_interval_reference, $r1->begin_interval_reference, $r2->end_interval_reference);
+
+    my $ret = new Religion::Bible::Regex::Reference($r1->get_configuration, $r1->get_regexes);
+
+    $ret->set({ b => $min->formatted_book, c => $min->c, v => $min->v, 
+		b2 => $max->formatted_book, c2 => $max->c, v2 => $max->v,
+		cvs => $r1->cvs, dash => $r1->dash,
+		s1 => $min->s1, s2 => $min->s2, 
+		s3 => $min->s3, s4 => $min->s4, 
+		s5 => $min->s5, s6 => $max->s1, 
+		s7 => $max->s2, s8 => $max->s3,
+		s9 => $max->s4, s10 => $max->s5,
+ });
+
+    return $ret;
+}
+sub min {
+    my $self = shift;
+    my @refs = @_; 
+    my $ret = $self;
+
+    foreach my $r (@refs) {
+	next unless (defined(ref $r));
+        if ($ret->gt($r)) {
+            $ret = $r;
+        }
+    }
+    return $ret;
+} 
+
+sub max {
+    my $self = shift;
+    my @refs = @_; 
+    my $ret = $self;
+
+    foreach my $r (@refs) {
+        if ($ret->lt($r)) {
+            $ret = $r;
+        }
+    }
+    return $ret;
+} 
+
+# References must be of the forms LCV, CV or V
+sub compare {
+    my $r1 = shift;
+    my $r2 = shift;
+    
+    # References must not be empty
+    return unless (_non_empty($r1));
+    return unless (_non_empty($r2));
+
+    # To be comparable both references must have the same state
+    # ex. 'Ge 1:1' may not be compared to 'chapter 2' or 'v. 4'
+    unless ($r1->state eq $r2->state) {
+	carp "Attempted to compare two reference that do no have the same state: " . $r1->normalize . " and " . $r2->normalize . "\n";
+	return;
+    }
+
+    return ($r1->key + 0 <=> $r2->key + 0) if (defined($r1->key) && defined($r2->key));
+    return ($r1->c + 0 <=> $r2->c + 0)     if (defined($r1->c) && defined($r2->c));
+    return ($r1->v + 0 <=> $r2->v + 0)       if (defined($r1->v) && defined($r2->v));
+    return;
+
+#    return 1 if ((defined($r1->key) && defined($r2->key)) && ($r1->key + 0 > $r2->key + 0));
+#    return 1 if ((defined($r1->c) && defined($r2->c)) && ($r1->c + 0 > $r2->c + 0));
+#    return 1 if ((defined($r1->v) && defined($r2->v)) && ($r1->v + 0 > $r2->v + 0));
+#    return;
+}
+
+sub gt {
+    my $r1 = shift;
+    my $r2 = shift;
+    
+    # References must not be empty
+    return unless (_non_empty($r1));
+    return unless (_non_empty($r2));
+
+    # To be comparable both references must have the same state
+    # ex. 'Ge 1:1' may not be compared to 'chapter 2' or 'v. 4'
+    unless ($r1->state eq $r2->state) {
+	carp "Attempted to compare two reference that do no have the same state: " . $r1->normalize . " and " . $r2->normalize . "\n";
+	return;
+    }
+
+    ($r1->compare($r2) == -1) ? return : return 1;
+
+}
+sub lt {
+    my $r1 = shift;
+    my $r2 = shift;
+    
+    # References must not be empty
+    return unless (_non_empty($r1));
+    return unless (_non_empty($r2));
+
+    # To be comparable both references must have the same state
+    # ex. 'Ge 1:1' may not be compared to 'chapter 2' or 'v. 4'
+    unless ($r1->state eq $r2->state) {
+	carp "Attempted to compare two reference that do no have the same state: " . $r1->normalize . " and " . $r2->normalize . "\n";
+	return;
+    }
+
+    ($r1->compare($r2) == 1) ? return : return 1;
+
+}
+
 sub _non_empty {
     my $value = shift;
     return (defined($value) && $value ne '');
