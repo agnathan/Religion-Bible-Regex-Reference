@@ -3,7 +3,7 @@ use utf8;
 use Data::Dumper;
 no warnings;
 
-plan tests => 21;
+plan tests => 28;
     
 my $yaml = <<"YAML";
 books:

@@ -1,9 +1,9 @@
 use t::TestConfig;
-#use utf8;
+use utf8;
 use Data::Dumper;
 no warnings;
 
-plan tests => 14;
+plan tests => 18;
     
 my $yaml = <<"YAML";
 books:

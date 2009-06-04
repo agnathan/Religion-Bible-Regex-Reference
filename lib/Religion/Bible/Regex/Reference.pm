@@ -684,6 +684,23 @@ sub parse_verset {
 # This section provides a default normalize form that is useful for various
 # operations with references
 ################################################################################
+sub parse_context_words {
+    my $self = shift;
+    my $refstr = shift;
+    my $state = shift;
+
+    my $header = '';
+    my $r = $self->get_regexes;
+    my $spaces = '[\s ]*';
+    
+    if ($refstr =~ m/^($r->{'verset_mots'})(?:[\s ]*)(?:$r->{'cv_list'})/) {	
+	$header = $1; $state = VERSE;
+    } elsif ($refstr =~ m/^($r->{'chapitre_mots'})(?:[\s ]*)(?:$r->{'cv_list'})/) {
+	$header = $1; $state = CHAPTER;
+    }
+    return ($header, $state);
+}
+
 sub normalize {
     my $self = shift;
     my $ba = shift || 'ORIGINAL';
@@ -1209,6 +1226,18 @@ Returns true if all the information is there to reference an exact verse or vers
 =head2 set_s10
 =head2 setold
 =head3 normalize
+
+=head2 compare
+=head2 end_interval_reference
+=head2 gt
+=head2 interval
+=head2 lt
+=head2 max
+=head2 min
+=head2 n
+=head2 s10
+=head2 state
+
 
 Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference
 

@@ -532,26 +532,33 @@ sub parse {
     if ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
         $state = 'match';
         $self->set({s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15, s9=>$17, v2=>$18, s10=>$19});
-    } 
-  
+    }   
+ 
+      # (s1)Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22(s10)
+    # type: LCVLC
+    elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {
+	$state = 'match';
+	$self->set({ s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15 });
+    }
+
     # (s1)Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22(s10)
     # type: LCLCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
-    $state = 'match';
+	$state = 'match';
         $self->set({ s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11, cvs=>$12, s9=>$13, v2=>$14, s10=>$15 });
     }
 
     # type: LCVCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
-    $state = 'match';
+	$state = 'match';
         $self->set({ s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, c2=>$12, s8=>$13, s9=>$15, v2=>$16, s10=>$17 });
     }
 
     # (s1)Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22(s10)
     # type: LCLC
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {
-    $state = 'match';
-        $self->set({ s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11 });
+	$state = 'match';
+	$self->set({ s1=>$1, b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11 });
     }
 
     # type: LCCV
@@ -831,8 +838,8 @@ sub interval {
     my $ret = new Religion::Bible::Regex::Reference($r1->get_configuration, $r1->get_regexes);
 
     $ret->set({ b => $min->formatted_book, c => $min->c, v => $min->v, 
-		b2 => $max->formatted_book, c2 => $max->c, v2 => $max->v,
-		cvs => $r1->cvs, dash => $r1->dash,
+		b2 => $max->formatted_book, c2 => $max->c, v2 => $max->v2 || $max->v,
+		cvs => $min->cvs || $max->cvs, dash => '-',
 		s1 => $min->s1, s2 => $min->s2, 
 		s3 => $min->s3, s4 => $min->s4, 
 		s5 => $min->s5, s6 => $max->s1, 
@@ -848,7 +855,7 @@ sub min {
     my $ret = $self;
 
     foreach my $r (@refs) {
-	next unless (defined(ref $r));
+#	next unless (defined(ref $r));
         if ($ret->gt($r)) {
             $ret = $r;
         }
@@ -885,17 +892,57 @@ sub compare {
 	return;
     }
 
-    return ($r1->key + 0 <=> $r2->key + 0) if (defined($r1->key) && defined($r2->key));
-    return ($r1->c + 0 <=> $r2->c + 0)     if (defined($r1->c) && defined($r2->c));
-    return ($r1->v + 0 <=> $r2->v + 0)       if (defined($r1->v) && defined($r2->v));
-    return;
+    # Messy logic that compares two references with a context of 'BOOK' 
+    # ex. 
+    # ('Ge 1:1' and 'Ge 2:1'), ('Ge 1:1' and 'Ge 2'), ('Ge 1' and 'Ge 2:1'), ('Ge 1' and 'Ge 2')   
+    # ('Ge 1:1' and 'Ex 2:1'), ('Ge 1:1' and 'Ex 2'), ('Ge 1' and 'Ex 2:1'), ('Ge 1' and 'Ex 2')   
+    # ('Ex 1:1' and 'Ge 2:1'), ('Ex 1:1' and 'Ge 2'), ('Ex 1' and 'Ge 2:1'), ('Ex 1' and 'Ge 2')   
+    if (defined($r1->key) && defined($r2->key)) {
+	if (($r1->key + 0 <=> $r2->key + 0) == 0) {
+	    if (defined($r1->c) && defined($r2->c)) {
+		if (($r1->c + 0 <=> $r2->c + 0) == 0) {
+		    if (defined($r1->v) && defined($r2->v)) {
+			return ($r1->v + 0 <=> $r2->v + 0);
+		    } else {
+			return ($r1->c + 0 <=> $r2->c + 0);
+		    }
+		} else {
+		    return ($r1->c + 0 <=> $r2->c + 0);
+		}
+	    } else {
+		return ($r1->key + 0 <=> $r2->key + 0);
+	    }
+	} else {
+	    return ($r1->key + 0 <=> $r2->key + 0);
+	}	
+    } 
+    # Messy logic that compares two references with a context of 'CHAPTER' 
+    # ex.  ('1:1' and '2:1'), ('1:1' and '2'), ('1' and '2:1'), ('1' and '2')
+    else {
+	if (defined($r1->c) && defined($r2->c)) {
+	    if (($r1->c + 0 <=> $r2->c + 0) == 0) {
+		if (defined($r1->v) && defined($r2->v)) {
+		    return ($r1->v + 0 <=> $r2->v + 0);
+		} else {
+		    return ($r1->c + 0 <=> $r2->c + 0);
+		}
+	    } else {
+		return ($r1->c + 0 <=> $r2->c + 0);
+	    }
+	} else {
+	    if (defined($r1->v) && defined($r2->v)) {
+		return ($r1->v + 0 <=> $r2->v + 0);
+	    } else {
+		return ($r1->c + 0 <=> $r2->c + 0);
+	    }
+	}
+    }
 
 #    return 1 if ((defined($r1->key) && defined($r2->key)) && ($r1->key + 0 > $r2->key + 0));
 #    return 1 if ((defined($r1->c) && defined($r2->c)) && ($r1->c + 0 > $r2->c + 0));
 #    return 1 if ((defined($r1->v) && defined($r2->v)) && ($r1->v + 0 > $r2->v + 0));
-#    return;
+    return;
 }
-
 sub gt {
     my $r1 = shift;
     my $r2 = shift;
@@ -929,7 +976,8 @@ sub lt {
 	return;
     }
 
-    ($r1->compare($r2) == 1) ? return : return 1;
+    my $ret = $r1->compare($r2);
+    ($ret == 1) ? return : return 1;
 
 }
 
@@ -1161,6 +1209,18 @@ Returns true if all the information is there to reference an exact verse or vers
 =head2 set_s10
 =head2 setold
 =head3 normalize
+
+=head2 compare
+=head2 end_interval_reference
+=head2 gt
+=head2 interval
+=head2 lt
+=head2 max
+=head2 min
+=head2 n
+=head2 s10
+=head2 state
+
 
 Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference
 
