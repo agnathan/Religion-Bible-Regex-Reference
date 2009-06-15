@@ -44,10 +44,10 @@ run {
     my $ref = new Religion::Bible::Regex::Reference($c, $b);
 
     # Parse the reference
-    $ref->parse($block->reference);
+    $ref->parse($block->reference, $block->state);
 
     # Normalize the reference
-    my $result = $ref->normalize;
+    my $result = $ref->normalize('CHAPTER');
     my $expected = $block->expected;
 
     is($result, $expected, $block->name);
@@ -73,73 +73,73 @@ Ge 1-Ex 2
 --- reference chomp
 Ge 1
 --- expected chomp
-Ge 1
+1
 === Parse LCVCV - Ge 1:1-2:5
 --- reference chomp
 Ge 1:1-2:5
 --- expected chomp
-Ge 1:1-2:5
+1:1-2:5
 === Parse LCCV - Ge 1-2:5
 --- reference chomp
 Ge 1-2:5
 --- expected chomp 
-Ge 1-2:5
+1-2:5
 === Parse LCC - Ge 1-2
 --- reference chomp
 Ge 1-2
 --- expected chomp
-Ge 1-2
+1-2
 === Parse LC - Ge 1
 --- reference chomp
 Ge 1
 --- expected chomp
-Ge 1
+1
 === Parse CVCV - 1:1-2:5
 --- reference chomp
 voir 1:1-2:5
 --- state chomp
 CHAPTER
 --- expected chomp
-voir 1:1-2:5
+1:1-2:5
 === Parse CCV - 1-2:5
 --- reference chomp
 voir 1-2:5
 --- state chomp
 CHAPTER
 --- expected chomp
-voir 1-2:5
+1-2:5
 === Parse CC - 1-2
 --- reference chomp
 voir 1-2
 --- state chomp
 CHAPTER
 --- expected chomp
-voir 1-2
+1-2
 === Parse C - 2
 --- reference chomp
 voir 1
 --- state chomp
 CHAPTER
 --- expected chomp
-voir 1
+1
 === Parse VV - 1-2
 --- reference chomp
 vv. 1-2
 --- state chomp
 VERSE
 --- expected chomp
-vv. 1-2
+1-2
 === Parse V - 2
 --- reference chomp
-v. 1
+1
 --- state chomp
 VERSE
 --- expected chomp
-v. 1
+1
 === Parse a book that has only one chapter - Jude 4
 --- reference chomp
 Jude 4
 --- state chomp
 VERSE
 --- expected chomp
-Jude 1:4
+1:4

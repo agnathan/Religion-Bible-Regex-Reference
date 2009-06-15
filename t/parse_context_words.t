@@ -23,8 +23,8 @@ books:
       Abbreviation: Ex
 
 regex:
-  chapitre_mots: (?:voir aussi|voir|a|ab)
-  verset_mots: (?:vv?\.|voir aussi v.)
+  chapitre_mots: (?:voir aussi|voir|a|ab|\\(|voir chapitre|\\bde\\b)
+  verset_mots: (?:vv?\.|voir aussi v\.|voir chapitre)
 
 YAML
 
@@ -45,12 +45,11 @@ run {
     my $r = new Religion::Bible::Regex::Reference($c, $b);
 
     # Parse the references
+#    $r->parse($block->reference);
     my ($header, $state) = $r->parse_context_words($block->reference);
 
-    chomp $header;
-
     # Do the testing
-    is($header, $block->header, $block->name . ':' . $block->reference);
+    is($header,   $block->header, $block->name . ':' . $block->reference);
     is($state,  $block->state,  $block->name . ':' . $block->reference);
 };
 
@@ -87,10 +86,42 @@ vv.
 --- state chomp
 VERSE
 
-=== parse_context_words - 
+=== parse_context_words
 --- reference chomp
 voir aussi v. 1:5
 --- header chomp
 voir aussi v.
 --- state chomp
 VERSE
+
+=== parse_context_words
+--- reference chomp
+vv. 1-2
+--- header chomp
+vv.
+--- state chomp
+VERSE
+
+=== parse_context_words - parathesis for context 
+--- reference chomp
+(1:5)
+--- header chomp
+(
+--- state chomp
+CHAPTER
+
+=== parse_context_words - should be a chapter when both chapter and verse regex have the same value
+--- reference chomp
+voir chapitre 1
+--- header chomp
+voir chapitre
+--- state chomp
+CHAPTER
+
+=== parse_context_words - test \b, regex word breaks
+--- reference chomp
+de 1:5
+--- header chomp
+de
+--- state chomp
+CHAPTER
