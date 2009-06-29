@@ -43,8 +43,8 @@ run {
     my $max = $r1->max($r1, $r2);
     
     # Do the testing
-    is($r1->normalize, $min->normalize, $block->name);
-    is($r2->normalize, $max->normalize, $block->name);
+    is($r1->formatted_normalize, $min->formatted_normalize, $block->name);
+    is($r2->formatted_normalize, $max->formatted_normalize, $block->name);
 };
 
 __END__

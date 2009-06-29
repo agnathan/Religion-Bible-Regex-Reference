@@ -604,7 +604,7 @@ run {
     $r->parse($block->input, $block->state);    
     my $t = $r->end_interval_reference;
     my $n = '';
-    $n = $t->normalize if defined($t);
+    $n = $t->formatted_normalize if defined($t);
     is($n, $block->expect, $block->name);
 };
 

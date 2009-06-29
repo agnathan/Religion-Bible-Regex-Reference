@@ -3,7 +3,7 @@ use utf8;
 use Data::Dumper;
 no warnings;
 
-plan tests => 9;
+plan tests => 11;
     
 my $yaml = <<"YAML";
 books:
@@ -42,8 +42,10 @@ books:
     Normalized: 
       Book: Deutéronome
       Abbreviation: De
-
+reference:
+  intervale: -
 regex:
+  intervale: (?:-|–|−|à)
   chapitre_mots: (?:voir aussi|voir|\\(|voir chapitre|\\bde\\b)
   verset_mots: (?:vv?\.|voir aussi v\.)
   livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
@@ -66,6 +68,15 @@ run {
 };
 
 __END__
+
+
+=== combine Exode 2; 3
+--- ref1 chomp
+Exode 2
+--- ref2 chomp
+Exode 3
+--- result chomp
+CHAPTER
 
 === combine És 2.10-21; Es 13.6-22
 --- ref1 chomp

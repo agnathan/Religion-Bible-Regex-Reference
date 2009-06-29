@@ -602,10 +602,7 @@ run {
     my $r = new Religion::Bible::Regex::Reference($c, $b);	
     
     $r->parse($block->input, $block->state);    
-    my $t = $r->begin_interval_reference;
-    my $n = $t->normalize;
-    my $s = $r->begin_interval_reference->normalize;
-    is($r->begin_interval_reference->normalize, $block->expect, $block->name);
+    is($r->begin_interval_reference->formatted_normalize, $block->expect, $block->name);
 };
 
 __END__

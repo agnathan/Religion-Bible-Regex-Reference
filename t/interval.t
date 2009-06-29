@@ -3,7 +3,7 @@ use utf8;
 use Data::Dumper;
 no warnings;
 
-plan tests => 28;
+plan tests => 30;
     
 my $yaml = <<"YAML";
 books:
@@ -42,6 +42,13 @@ books:
     Normalized: 
       Book: Deutéronome
       Abbreviation: De
+  19: 
+    Match:
+      Book: ['Psaumes', 'Psaume', 'psaumes', 'psaume']
+      Abbreviation: ['Ps']
+    Normalized: 
+      Book: Psaume
+      Abbreviation: Ps
 
 regex:
   livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
@@ -60,7 +67,7 @@ run {
     $r2->parse($block->ref2, $block->state);    
     my $i = $r1->interval($r2);
 
-    is($r1->interval($r2)->normalize, $block->expect, $block->name);
+    is($r1->interval($r2)->formatted_normalize, $block->expect, $block->name);
 };
 
 #__END__
@@ -273,9 +280,21 @@ run {
 # Ge 1-De 7:8
 
 __END__
+=== begin_interval_reference LCV - Ps 1:3, LCV - Ps 1:4
+--- ref1 chomp
+Ps 1:3
+--- ref2 chomp
+Ps 1:4
+--- expect chomp 
+Ps 1:3-4
 
-
-
+=== begin_interval_reference LCV - Ge 1:1, LCV - Ge 1:1
+--- ref1 chomp
+Ge 1:1
+--- ref2 chomp
+Ge 1:1
+--- expect chomp 
+Ge 1:1
 
 
 

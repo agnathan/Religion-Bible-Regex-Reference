@@ -3,7 +3,7 @@ use t::TestConfig;
 use Data::Dumper;
 no warnings;
 
-plan tests => 14;
+plan tests => 16;
     
 my $yaml = <<"YAML";
 books:
@@ -688,4 +688,14 @@ VERSE
 Jude 4
 --- state chomp
 VERSE
+--- expect chomp
+
+=== has_interval LCLC - Ge 1-Ge 1
+--- input chomp
+Ge 1-Ge 1
+--- expect chomp
+
+=== has_interval LCVLCV - Ge 1:3-Ge 1:3
+--- input chomp
+Ge 1:3-Ge 1:3
 --- expect chomp

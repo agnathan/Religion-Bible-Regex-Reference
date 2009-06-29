@@ -47,58 +47,53 @@ run {
     $ref->parse($block->reference);
 
     # Normalize the reference
-    my $result = $ref->normalize;
+    my $result = $ref->formatted_normalize;
     my $expected = $block->expected;
 
     is($result, $expected, $block->name);
 };
 
-#=== Parse not reference - Michael 2:3
-#--- reference chomp
-#Michael 2:3
-#--- expected chomp
-
 __END__
-=== Parse LCVLCV - Genèse 1:1-Exode 2:5
+=== Parse LCVLCV - Ge 1:1-Ex 2:5
 --- reference chomp
-Genèse 1:1-Exode 2:5
+Ge 1:1-Ex 2:5
 --- expected chomp
-Genèse 1:1-Exode 2:5
-=== Parse LCLCV - Genèse 1-Exode 2:5
+Ge 1:1-Ex 2:5
+=== Parse LCLCV - Ge 1-Ex 2:5
 --- reference chomp
-Genèse 1-Exode 2:5
+Ge 1-Ex 2:5
 --- expected chomp 
-Genèse 1-Exode 2:5
-=== Parse LCLC - Genèse 1-Exode 2
+Ge 1-Ex 2:5
+=== Parse LCLC - Ge 1-Ex 2
 --- reference chomp
-Genèse 1-Exode 2
+Ge 1-Ex 2
 --- expected chomp
-Genèse 1-Exode 2
-=== Parse LC - Genèse 1
+Ge 1-Ex 2
+=== Parse LC - Ge 1
 --- reference chomp
-Genèse 1
+Ge 1
 --- expected chomp
-Genèse 1
-=== Parse LCVCV - Genèse 1:1-2:5
+Ge 1
+=== Parse LCVCV - Ge 1:1-2:5
 --- reference chomp
-Genèse 1:1-2:5
+Ge 1:1-2:5
 --- expected chomp
-Genèse 1:1-2:5
-=== Parse LCCV - Genèse 1-2:5
+Ge 1:1-2:5
+=== Parse LCCV - Ge 1-2:5
 --- reference chomp
-Genèse 1-2:5
+Ge 1-2:5
 --- expected chomp 
-Genèse 1-2:5
-=== Parse LCC - Genèse 1-2
+Ge 1-2:5
+=== Parse LCC - Ge 1-2
 --- reference chomp
-Genèse 1-2
+Ge 1-2
 --- expected chomp
-Genèse 1-2
-=== Parse LC - Genèse 1
+Ge 1-2
+=== Parse LC - Ge 1
 --- reference chomp
-Genèse 1
+Ge 1
 --- expected chomp
-Genèse 1
+Ge 1
 === Parse CVCV - 1:1-2:5
 --- reference chomp
 voir 1:1-2:5
@@ -149,35 +144,33 @@ VERSE
 --- expected chomp
 Jude 1:4
 
-=== Parse LCVLCV - Genèse 1:1-Genèse 2:5 - Shorten reference when books are the same
+=== Parse LCVLCV - Ge 1:1-Ge 2:5 - Shorten reference when books are the same
 --- reference chomp
-Genèse 1:1-Genèse 2:5
+Ge 1:1-Ge 2:5
 --- expected chomp
-Genèse 1:1-2:5
+Ge 1:1-2:5
 
-=== Parse LCLC - Genèse 1-Genèse 2 - Shorten reference when book and chapter are the same
+=== Parse LCLC - Ge 1-Ge 2 - Shorten reference when book and chapter are the same
 --- reference chomp
-Genèse 2-Genèse 2
+Ge 2-Ge 2
 --- expected chomp
-Genèse 2
+Ge 2
 
-=== Parse LCVLCV - Genèse 1:1-Genèse 2:5 - Shorten reference when book, chapter and verse are the same
+=== Parse LCVLCV - Ge 1:1-Ge 2:5 - Shorten reference when book, chapter and verse are the same
 --- reference chomp
-Genèse 2:5-Genèse 2:5
+Ge 2:5-Ge 2:5
 --- expected chomp
-Genèse 2:5
+Ge 2:5
 
 
-=== Parse LCVLCV - Genèse 1:1-Genèse 2:5 - Shorten reference when books are the same, cvs should be ':'
+=== Parse LCVLCV - Ge 1:1-Ge 2:5 - Shorten reference when books are the same, cvs should be ':'
 --- reference chomp
-Genèse 1.1-Genèse 2.5
+Ge 1.1-Ge 2.5
 --- expected chomp
-Genèse 1:1-2:5
+Ge 1.1-2.5
 
-=== Parse LCVLCV - Genèse 1:1-Genèse 2:5 - Shorten reference when book, chapter and verse are the same, cvs should be ':'
+=== Parse LCVLCV - Ge 1:1-Ge 2:5 - Shorten reference when book, chapter and verse are the same, cvs should be ':'
 --- reference chomp
-Genèse 2.5-Genèse 2.5
+Ge 2.5-Ge 2.5
 --- expected chomp
-Genèse 2:5
-
-
+Ge 2.5

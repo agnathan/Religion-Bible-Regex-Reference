@@ -60,9 +60,8 @@ run {
     
     $r1->parse($block->ref1, $block->ref1state);    
     $r2->parse($block->ref2, $block->ref2state);    
-    my $i = $r1->combine($r2);
 
-    is($r1->combine($r2)->normalize, $block->result, $block->name);
+    is($r1->combine($r2)->formatted_normalize, $block->result, $block->name);
 };
 
 
