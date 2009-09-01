@@ -92,14 +92,18 @@ sub oc2  { shift->{'reference'}{'original'}{'c2'}; }
 sub ov   { shift->{'reference'}{'original'}{'v'};  }
 sub ov2  { shift->{'reference'}{'original'}{'v2'}; }
 
-sub s2   { shift->{'reference'}{'spaces'}{'s2'}; }
-sub s3   { shift->{'reference'}{'spaces'}{'s3'}; }
-sub s4   { shift->{'reference'}{'spaces'}{'s4'}; }
-sub s5   { shift->{'reference'}{'spaces'}{'s5'}; }
-sub s6   { shift->{'reference'}{'spaces'}{'s6'}; }
-sub s7   { shift->{'reference'}{'spaces'}{'s7'}; }
-sub s8   { shift->{'reference'}{'spaces'}{'s8'}; }
-sub s9   { shift->{'reference'}{'spaces'}{'s9'}; }
+# We could simply write these functions as 
+# sub s2   { shift->{'reference'}{'spaces'}{'s2'}; }
+# However, if there are no spaces defined this code will defined an empty hash, shift->{'reference'}{'spaces'}.
+# I want these functions to have absolutely no side-effects, so therefore I'm going to write them in a bit longer style
+sub s2   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s2'}; }
+sub s3   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s3'}; }
+sub s4   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s4'}; }
+sub s5   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s5'}; }
+sub s6   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s6'}; }
+sub s7   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s7'}; }
+sub s8   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s8'}; }
+sub s9   { my $s = shift; return unless defined($s->{'reference'}{'spaces'}); return $s->{'reference'}{'spaces'}{'s9'}; }
 
 sub book { 
     my $self = shift;
@@ -130,12 +134,12 @@ sub book2key {}
 sub abbreviation2key {}
 
 # Subroutines for setting
-#sub set_key   {
-#    my $self = shift; 
-#    my $e = shift;
-#    return unless (_non_empty($e));
-#    $self->{'reference'}{'data'}{'key'} = $e; 
-#}
+sub set_key   {
+    my $self = shift; 
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'data'}{'key'} = $e; 
+}
 sub set_c     {
     my $self = shift;
     my $e = shift;
@@ -146,8 +150,10 @@ sub set_c     {
 sub set_v     {
     my $self = shift;
     my $e = shift;
+
+    my $r = $self->get_regexes;
     return unless (_non_empty($e));
-    if ($e =~ m/(@{[$self->get_regexes->{'verse_number'}]})(@{[$self->get_regexes->{'verse_letter'}]})/) {
+    if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
 	$self->{'reference'}{'data'}{'v'}   = $1 if defined($1);
 	$self->{'reference'}{'data'}{'vletter'} = $2 if defined($2);
     } else {
@@ -156,12 +162,26 @@ sub set_v     {
     $self->{'reference'}{'original'}{'v'}   = $e; 
 }
 
-# sub set_key2  {
-#    my $self = shift;
-#    my $e = shift;
-#    return unless (_non_empty($e));
-#    $self->{'reference'}{'data'}{'key2'} = $e; 
-#}
+ sub set_key2  {
+    my $self = shift;
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'data'}{'key2'} = $e; 
+}
+
+ sub set_ob  {
+    my $self = shift;
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'original'}{'b'} = $e; 
+}
+
+ sub set_ob2  {
+    my $self = shift;
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'original'}{'b2'} = $e; 
+}
 
 sub set_b     {
     my $self = shift;
@@ -172,9 +192,9 @@ sub set_b     {
     # If there is a key then create the book2key and abbreviation2key associations
     my $key = $self->get_regexes->key($e);
     unless (defined($key)) {
-	print Dumper $self->{'regex'}{'book2key'};
-	print Dumper $self->{'regex'}{'abbreviation2key'};
-	croak "Key must be defined: $e\n";
+      print Dumper $self->{'regex'}{'book2key'};
+  	  print Dumper $self->{'regex'}{'abbreviation2key'};
+	    croak "Book or Abbreviation must be defined in the configuration file: $e\n";
     }
     $self->{'reference'}{'data'}{'key'} = $self->get_regexes->key($e);
 }
@@ -196,9 +216,11 @@ sub set_c2    {
 sub set_v2    {
     my $self = shift;
     my $e = shift;
+
+    my $r = $self->get_regexes;
     return unless (_non_empty($e));
-    if ($e =~ m/(@{[$self->get_regexes->{'verse_number'}]})(@{[$self->get_regexes->{'verse_letter'}]})/) {
-	$self->{'reference'}{'data'}{'v2'}   = $1 if (defined($1));
+    if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
+	$self->{'reference'}{'data'}{'v2'} = $1 if (defined($1));
 	$self->{'reference'}{'data'}{'v2letter'} = $2 if (defined($1));
     } else {
 	$self->{'reference'}{'data'}{'v2'}   = $e;
@@ -295,8 +317,8 @@ sub formatted_book {
 
     # Check to be sure that book_format has a proper value, if it doesn't then warn and set it
     if (!($book_format eq 'ORIGINAL' || $book_format eq 'CANONICAL_NAME' || $book_format eq 'ABBREVIATION')) {
-	confess "book_format should be either 'ORIGINAL', 'CANONICAL_NAME', 'ABBREVIATION'";
-	$book_format = 'ORIGINAL';
+        confess "book_format should be either 'ORIGINAL', 'CANONICAL_NAME', 'ABBREVIATION'";
+        $book_format = 'ORIGINAL';
     }
 
     if ($book_format eq 'ABBREVIATION' || ($book_format eq 'ORIGINAL' && $self->book_type eq 'ABBREVIATION')) {
@@ -333,6 +355,7 @@ sub set {
     my $r = shift;
     my $context = shift;
 
+    $self->{reference} = {};
     $self->{reference} = dclone($context->{reference}) if defined($context->{reference});
 
     # $r must be a defined hash
@@ -342,12 +365,24 @@ sub set {
     $self->set_context_words($r->{context_words});
 
     # Set the main part of the reference
-    $self->set_b($r->{b});   # Match Book
+    if (defined($r->{key})) {
+      $self->set_key($r->{key});   # Key 
+    } else {
+      $self->set_b($r->{b});   # Match Book
+    }
+
+    $self->set_ob($r->{ob});   # Original book or abbreviation 
     $self->set_c($r->{c});   # Chapter
     $self->set_v($r->{v});   # Verse
 
     # Set the range part of the reference    
-    $self->set_b2($r->{b2});  # Match Book
+    if (defined($r->{key2})) {
+      $self->set_key2($r->{key2});   # Key 
+    } else {
+      $self->set_b2($r->{b2});   # Match Book
+    }
+
+    $self->set_ob2($r->{ob2});   # Chapter
     $self->set_c2($r->{c2});  # Chapter
     $self->set_v2($r->{v2});  # Verse
 
@@ -556,7 +591,8 @@ sub parse_context_words {
     my $header = '';
 
     if ($refstr =~ m/^($r->{'livres_et_abbreviations'})(?:$spaces)(?:$r->{'cv_list'})/) {
-	$header = $1; $state = BOOK;
+#	$header = $1; $state = BOOK;
+	$state = BOOK;
     } elsif ($refstr =~ m/^($r->{'chapitre_mots'})(?:$spaces)(?:$r->{'cv_list'})/) {
 	$header = $1; $state = CHAPTER;
     } elsif ($refstr =~ m/($r->{'verset_mots'})(?:$spaces)(?:$r->{'cv_list'})/) {
@@ -570,9 +606,9 @@ sub formatted_context_words {
     my $ret = '';
     
     # Only print the context words if state is chapter or verse
-    if ($self->state_is_chapitre || $self->state_is_verset) {
+    #if ($self->state_is_chapitre || $self->state_is_verset) {
 	$ret .= $self->context_words || '';
-    }
+    #}
 
     return $ret;
 }
@@ -662,11 +698,15 @@ sub formatted_normalize {
 	$state = 'CHAPTER';
     }
 
+    if (_non_empty($self->formatted_context_words)) {
+	$ret .= $self->formatted_context_words;
+	$ret .= ' ' if defined($self->s2);
+    }
+
     # Write out the context words and the book or abbreviation
     if ($state eq 'BOOK') {	
-	$ret .= $self->formatted_context_words($state, $book_format);
 	$ret .= $book = $self->formatted_book($book_format);
-	$ret .= ' ' if defined($self->s2);
+	$ret .= ' ' if defined($self->s2) && _non_empty($self->formatted_book($book_format));
     }
 
     # Write out the chapter and the chapter/verse separator
@@ -705,7 +745,6 @@ sub formatted_normalize {
 # When debugging I don't want to type normalize over and over again
 sub n { return shift->normalize; }
 
-
 sub bol {
     my $self = shift;
     my $state = shift || 'BOOK';
@@ -742,9 +781,11 @@ sub bol {
     # Write out the interval character to connect two references as a range of verses
     $ret .= $self->formatted_interval;
 
+    # Get book2 formatted
+    $book2 = $self->formatted_book2($book_format);
+
     # Write out the second book or abbreviation
     if ($state eq 'BOOK' && _non_empty($book2) && $book ne $book2) {
-	$book2 = $self->formatted_book2($book_format);
 	$ret .= $book2;
 
 	# If there is a space defined after book2 and we are not printing the same book twice then ' '
@@ -763,82 +804,6 @@ sub bol {
     # Write out the second verse
     $ret .= $self->formatted_v2;
 
-    return $ret;
-}
-
-sub bolold {
-    my $self = shift;
-    my $state = shift || 'BOOK';
-    my $ba = shift || 'ORIGINAL';
-    my $ret = '';
-
-    if (defined($self->book) && defined($self->book2) || (!(defined($self->v) || defined($self->v2)) && $state eq 'VERSE') ) {
-	$state = 'BOOK';
-    } elsif (defined($self->c) && defined($self->c2) && $state eq 'VERSE') {
-	$state = 'CHAPTER';
-    }
-
-    if ($state eq 'BOOK') {
-	# if ($self->state_is_chapitre || $self->state_is_verset) {
-	#     $ret .= $self->context_words || '';
-	# }
-
-	if ($ba eq 'ABBREVIATION' || ($ba eq 'ORIGINAL' && $self->book_type eq 'ABBREVIATION')) {
-	    $ret .= $self->abbreviation || '';
-	} else {
-	    $ret .= $self->book || '';
-	}
-
-	$ret .= ' ' if defined($self->s2);
-    }
-
-    if ($state eq 'BOOK' || $state eq 'CHAPTER') {
-	$ret .= $self->c || '';
-	$ret .= (_non_empty($self->c) && ! _non_empty($self->v) && (_non_empty($self->c2) && ! _non_empty($self->v2)) ) ? $self->cvs || '$' : '';
-	$ret .= (
-	    (_non_empty($self->c) && _non_empty($self->v)) 
-	    ? 
-	    (defined($self->get_configuration->get('reference','cvs')) 
-	     ? 
-	     $self->get_configuration->get('reference','cvs')
-	     :
-	     (defined( $self->cvs ) ? $self->cvs : ':')) 
-	    :
-	    '');
-    }
-
-    $ret .= $self->v || '';
-    $ret .= ((_non_empty($self->formatted_book2) || _non_empty($self->c2) || _non_empty($self->v2) ) 
-	     ? 
-	     (defined($self->get_configuration->get('reference','intervale'))
-	      ? 
-	      $self->get_configuration->get('reference','intervale') 
-	      :
-	      (defined( $self->dash ) ? $self->dash : ':')) 
-	     :
-	     '');
-
-    if ($ba eq 'ABBREVIATION' || ($ba eq 'ORIGINAL' && $self->book_type eq 'ABBREVIATION')) {
-	$ret .= $self->abbreviation2 || '';
-    } else {
-	$ret .= $self->book2 || '';
-    }
-
-    $ret .= ' ' if defined($self->s7);
-
-    $ret .= $self->c2 || '';
-    $ret .= (_non_empty($self->c) && ! _non_empty($self->v) && (_non_empty($self->c2) && ! _non_empty($self->v2)) ) ? $self->cvs || '$' : '';
-    $ret .= (
-	(_non_empty($self->c2) && _non_empty($self->v2)) 
-	? 
-	(defined($self->get_configuration->get('reference','cvs')) 
-	 ? 
-	 $self->get_configuration->get('reference','cvs') 
-	 :
-	 (defined( $self->cvs ) ? $self->cvs : ':')) 
-	:
-	'');    
-    $ret .= $self->v2 || '';
     return $ret;
 }
 
@@ -977,7 +942,13 @@ sub shared_state {
     # Two references can not have shared context if they do not have the same state
     return unless ($r1->state eq $r2->state);
 
-    return VERSE   if ((defined($r1->v) && defined($r2->v))     && (($r1->v ne $r2->v) && ($r1->c eq $r2->c) && ($r1->key eq $r2->key)) );
+    return VERSE   if ( ((defined($r1->v) && defined($r2->v)) && ($r1->v ne $r2->v))
+			&& 
+			((defined($r1->c) && defined($r2->c) && ($r1->c eq $r2->c)) || (!(defined($r1->c) && defined($r2->c))))
+			&& 
+			((defined($r1->key) && defined($r2->key) && ($r1->key eq $r2->key)) || (!(defined($r1->key) && defined($r2->key))))
+	);
+
     return CHAPTER if ((defined($r1->c) && defined($r2->c))     && (($r1->c ne $r2->c) && (!(defined($r1->key) && defined($r2->key)) || (defined($r1->c) && defined($r2->c) && $r1->key eq $r2->key))) );
     return BOOK    if ((defined($r1->key) && defined($r2->key)) && (($r1->key ne $r2->key)));
     return;
@@ -1001,13 +972,14 @@ sub begin_interval_reference {
     my $self = shift;
     my $ret = new Religion::Bible::Regex::Reference($self->get_configuration, $self->get_regexes); 
 
-    $ret->set({ b => $self->ob, 
-		c => $self->oc, 
-		v => $self->ov, 
-		s2 => $self->s2, 
-		s3 => $self->s3, s4 => $self->s4, 
-		s5 => $self->s5, cvs => $self->cvs, 
-	        context_words => $self->context_words});
+    $ret->set({ key => $self->key, 
+                ob => $self->ob, 
+            		c => $self->oc, 
+                v => $self->ov, 
+                s2 => $self->s2, 
+                s3 => $self->s3, s4 => $self->s4, 
+                s5 => $self->s5, cvs => $self->cvs, 
+      	        context_words => $self->context_words});
 
     return $ret;
 }
@@ -1015,31 +987,35 @@ sub end_interval_reference {
     my $self = shift;
     my $ret = new Religion::Bible::Regex::Reference($self->get_configuration, $self->get_regexes); 
 
-    my ($b, $c, $s7);
+    my ($b, $c, $s7, $key);
 
-    if (!defined($self->ob2) && (defined($self->oc2) || defined($self->ov2) )) {
-	$b = $self->ob;
-	$s7 = $self->s2;
+    if (!defined($self->key2) && (defined($self->oc2) || defined($self->ov2) )) {
+    	$b = $self->ob;
+      $key = $self->key;
+    	$s7 = $self->s2;
     } else {
-	$b = $self->ob2;
-	$s7 = $self->s7;
+    	$b = $self->ob2;
+      $key = $self->key2;
+    	$s7 = $self->s7;
     }
 
     if (!defined($self->oc2) && ( defined($self->ov2) )) {
-	$c = $self->oc;
+    	$c = $self->oc;
     } else {
-	$c = $self->oc2;
+    	$c = $self->oc2;
     }
     
     return unless (_non_empty($b) || _non_empty($c) || _non_empty($self->ov2));
 
-    $ret->set({ b => $b,
-		c => $c, 
-		v => $self->ov2, 
-		s2 => $s7,
-		s3 => $self->s8, s4 => $self->s9, 
-		cvs => $self->cvs,
-		context_words => $self->context_words});
+    $ret->set({ key => $key, 
+                ob => $b,
+                c => $c, 
+                v => $self->ov2, 
+                s2 => $s7,
+                s3 => $self->s8, 
+                s4 => $self->s9, 
+                cvs => $self->cvs,
+                context_words => $self->context_words});
 
     return $ret;
 }
@@ -1066,14 +1042,24 @@ sub interval {
 
     my $ret = new Religion::Bible::Regex::Reference($r1->get_configuration, $r1->get_regexes);
 
-    $ret->set({ b => $min->formatted_book, c => $min->c, v => $min->v, 
-		b2 => $max->formatted_book, c2 => $max->c, v2 => $max->v2 || $max->v,
-		cvs => $min->cvs || $max->cvs, dash => '-',
-		s2 => $min->s2, 
-		s3 => $min->s3, s4 => $min->s4, 
-		s5 => $min->s5,  
-		s7 => $max->s2, s8 => $max->s3,
-		s9 => $max->s4, context_words => $min->context_words
+    $ret->set({ key => $min->key, 
+                ob => $min->ob, 
+                c => $min->c, 
+                v => $min->v, 
+                key2 => $max->key, 
+                ob2 => $max->ob,
+                c2 => $max->c, 
+                v2 => $max->v2 || $max->v,
+                cvs => $min->cvs || $max->cvs, 
+                dash => '-',
+                s2 => $min->s2, 
+                s3 => $min->s3, 
+                s4 => $min->s4, 
+                s5 => $min->s5,  
+                s7 => $max->s2, 
+                s8 => $max->s3,
+                s9 => $max->s4, 
+                context_words => $min->context_words
 	      });
 
     return $ret;
@@ -1214,7 +1200,8 @@ sub lt {
 sub combine {
     my $r1 = shift;
     my $r2 = shift;
-    
+    my %p; 
+
     # References must not be empty
     return unless (_non_empty($r1));
     return unless (_non_empty($r2));
@@ -1222,53 +1209,43 @@ sub combine {
     my $ret = new Religion::Bible::Regex::Reference($r1->get_configuration, $r1->get_regexes);
 
     if ($r2->state eq 'BOOK') {
-	$ret->set({context_words => $r2->context_words}, $r2);
+      $p{'context_words'} = ($r2->context_words) if (defined($r2->context_words));
+	    $ret->set( \%p, $r2 );
     } elsif ($r2->state eq 'CHAPTER') {    
-	$ret->set(
-	    {
-		b => $r2->formatted_book2 || $r2->formatted_book || $r1->formatted_book2 || $r1->formatted_book,
-		c => $r2->c,
-		v => $r2->v,
-
-		c2 => $r2->c2,
-		v2 => $r2->v2,	
-		
- 		cvs => $r2->cvs ||  $r1->cvs,
- 		dash => $r2->dash || $r1->dash,
- 		s2 => $r2->s2 || $r1->s2, 
- 		s3 => $r2->s3 || $r1->s3, 
- 		s4 => $r2->s4 || $r1->s4, 
- 		s5 => $r2->s5 || $r1->s5, 
- 		s6 => $r2->s6 || $r1->s6, 
- 		s7 => $r2->s7, 
- 		s8 => $r2->s8 || $r1->s8,
- 		s9 => $r2->s9 || $r1->s9, 
-		
-		context_words => $r2->context_words,
-	    }, $r2
-	    );
+      $p{'key'} = ($r1->key2 || $r1->key) if (defined($r1->key2 || $r1->key));
+      $p{'ob'} = ($r1->ob2 || $r1->ob) if (defined($r1->ob2 || $r1->ob));
+      $p{'c'} = ($r2->c) if (defined($r2->c));
+      $p{'v'} = ($r2->v) if (defined($r2->v));
+      $p{'c2'} = ($r2->c2) if (defined($r2->c2));
+      $p{'v2'} = ($r2->v2) if (defined($r2->v2));
+      $p{'cvs'} = ($r2->cvs ||  $r1->cvs) if (defined($r2->cvs ||  $r1->cvs));
+      $p{'dash'} = ($r2->dash || $r1->dash) if (defined($r2->dash || $r1->dash));
+      $p{'context_words'} = ($r2->context_words) if (defined($r2->context_words));
+      $p{'s2'} = ($r2->s2 || $r1->s2) if (defined( $r2->s2 || $r1->s2 ));
+      $p{'s3'} = ($r2->s3 || $r1->s3) if (defined( $r2->s3 || $r1->s3 ));
+      $p{'s4'} = ($r2->s4 || $r1->s4) if (defined( $r2->s4 || $r1->s4 ));
+      $p{'s5'} = ($r2->s5 || $r1->s5) if (defined( $r2->s5 || $r1->s5 ));
+      $p{'s6'} = ($r2->s6 || $r1->s6) if (defined( $r2->s6 || $r1->s6 ));
+      $p{'s8'} = ($r2->s8 || $r1->s8) if (defined( $r2->s8 || $r1->s8 ));
+      $p{'s9'} = ($r2->s9 || $r1->s9) if (defined( $r2->s9 || $r1->s9 ));
+      $ret->set( \%p, $r2);
     } else {
-	$ret->set(
-	    {
-		b => $r2->formatted_book2 || $r2->formatted_book || $r1->formatted_book2 || $r1->formatted_book,
-		c => $r2->c2 || $r2->c || $r1->c2 || $r1->c,
-		v => $r2->v,
-
-		v2 => $r2->v2,
-		cvs => $r2->cvs || $r1->cvs,
-		dash => $r2->dash || $r1->dash,
-		s2 => $r2->s2 || $r1->s2, 
-		s3 => $r2->s3 || $r1->s3, 
-		s4 => $r2->s4 || $r1->s4, 
-		s5 => $r2->s5 || $r1->s5, 
-		s6 => $r2->s6 || $r1->s6, 
-		s7 => $r2->s7,
-		s8 => $r2->s8 || $r1->s8,
-		s9 => $r2->s9 || $r1->s9, 
-
-		context_words => $r2->context_words,
-	    }, $r2
-	    );
+      $p{'key'} = ($r1->key2 || $r1->key) if (defined($r1->key2 || $r1->key));
+      $p{'ob'} = ($r1->ob2 || $r1->ob) if (defined($r1->ob2 || $r1->ob));
+      $p{'c'} = ($r2->c2 || $r2->c || $r1->c2 || $r1->c,) if (defined($r2->c2 || $r2->c || $r1->c2 || $r1->c,));
+      $p{'v'} = ($r2->v) if (defined($r2->v));
+      $p{'v2'} = ($r2->v2) if (defined($r2->v2));
+      $p{'cvs'} = ($r2->cvs ||  $r1->cvs) if (defined($r2->cvs ||  $r1->cvs));
+      $p{'dash'} = ($r2->dash || $r1->dash) if (defined($r2->dash || $r1->dash));
+      $p{'context_words'} = ($r2->context_words) if (defined($r2->context_words));
+      $p{'s2'} = ($r2->s2 || $r1->s2) if (defined( $r2->s2 || $r1->s2 ));
+      $p{'s3'} = ($r2->s3 || $r1->s3) if (defined( $r2->s3 || $r1->s3 ));
+      $p{'s4'} = ($r2->s4 || $r1->s4) if (defined( $r2->s4 || $r1->s4 ));
+      $p{'s5'} = ($r2->s5 || $r1->s5) if (defined( $r2->s5 || $r1->s5 ));
+      $p{'s6'} = ($r2->s6 || $r1->s6) if (defined( $r2->s6 || $r1->s6 ));
+      $p{'s8'} = ($r2->s8 || $r1->s8) if (defined( $r2->s8 || $r1->s8 ));
+      $p{'s9'} = ($r2->s9 || $r1->s9) if (defined( $r2->s9 || $r1->s9 ));
+      $ret->set( \%p, $r2);
     }
     
     return $ret;
@@ -2066,7 +2043,10 @@ If there is an interval part then it's printed next.
 =head2 	state_is_book
 =head2 	state_is_chapitre
 =head2 	state_is_verset
-
+=head2  set_key
+=head2  set_key2
+=head2  set_ob
+=head2  set_ob2
 
 
     Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference

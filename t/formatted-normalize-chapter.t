@@ -100,35 +100,35 @@ voir 1:1-2:5
 --- state chomp
 CHAPTER
 --- expected chomp
-1:1-2:5
+voir 1:1-2:5
 === Parse CCV - 1-2:5
 --- reference chomp
 voir 1-2:5
 --- state chomp
 CHAPTER
 --- expected chomp
-1-2:5
+voir 1-2:5
 === Parse CC - 1-2
 --- reference chomp
 voir 1-2
 --- state chomp
 CHAPTER
 --- expected chomp
-1-2
+voir 1-2
 === Parse C - 2
 --- reference chomp
 voir 1
 --- state chomp
 CHAPTER
 --- expected chomp
-1
+voir 1
 === Parse VV - 1-2
 --- reference chomp
 vv. 1-2
 --- state chomp
 VERSE
 --- expected chomp
-1-2
+vv. 1-2
 === Parse V - 2
 --- reference chomp
 1

@@ -91,7 +91,6 @@ Ge 1:1-Ex 2:5
 	'key2' => '2',
 	'c2' => '2',
 	'v2' => '5',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b'  => 'Ge',
@@ -122,7 +121,6 @@ Ge 1:1-Ex 2:5
 	'key2' => '2',
 	'c2' => '2',
 	'v2' => '5',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b'  => 'Ge',
@@ -152,7 +150,6 @@ Ge 1:5-Ex 2
 	'v' => '5',
 	'key2' => '2',
 	'c2' => '2',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -181,7 +178,6 @@ Ge 1-Ex 2
 	'c' => '1',
 	'key2' => '2',
 	'c2' => '2',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -206,7 +202,6 @@ Ge 1
     'data' => {
 	'key' => '1',
 	'c' => '1',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -227,7 +222,6 @@ Ge 1:1-2:5
 	'v' => '1',
 	'c2' => '2',
 	'v2' => '5',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -254,7 +248,6 @@ Ge 1-2:5
 	'c' => '1',
 	'c2' => '2',
 	'v2' => '5',
-	'context_words' => 'Ge'
     },
     'original' => {
 	'b' => 'Ge',
@@ -280,7 +273,6 @@ Ge 1-2
 	'key' => '1',
 	'c' => '1',
 	'c2' => '2',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -303,7 +295,6 @@ Ge 1
     'data' => {
 	'key' => '1',
 	'c' => '1',
-	'context_words' => 'Ge',
     },
     'original' => {
 	'b' => 'Ge',
@@ -437,7 +428,6 @@ VERSE
 	'key' => '65',
 	'c' => '1',
 	'v' => '4',
-	'context_words' => 'Jude',
     },
     'original' => {
 	'b'  => 'Jude',
@@ -462,7 +452,6 @@ VERSE
         'key' => '65',
         'c' => '1',
         'v' => '4',
-	'context_words' => 'Jude',
     },
     'original' => {
         'b'  => 'Jude',

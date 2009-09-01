@@ -12,6 +12,7 @@ run {
     my $hash = $ref->{'reference'};
 #    print Dumper $hash;
     my $result = $block->result;
+#    print Dumper $ref->{reference};
     is_deeply($hash, $result, $block->name);
 };
 
@@ -525,7 +526,7 @@ books:
     },
     'original' => {
 	'c' => '1',
-    },
+    }
 }
 === Parse VV - 1-2
 --- yaml
@@ -668,4 +669,52 @@ regex:
         'cvs' =>':',
     }
 
+}
+=== Parse LCVLCV - Ge 1:1-Ex 2:5 - using keys instead of books and abbreviations
+--- yaml
+---
+books:
+  1: 
+    Match:
+      Book: ['Genèse', 'Genese']
+      Abbreviation: ['Ge']
+    Normalized: 
+      Book: Genèse
+      Abbreviation: Ge
+  2: 
+    Match:
+      Book: ['Exode']
+      Abbreviation: ['Ex']
+    Normalized: 
+      Book: Exode
+      Abbreviation: Ex
+regex:
+  livres_avec_un_chapitre: (?:Ab|Abdias|2Jn|2Jean|Phm|Philemon|Philémon|Jud|Jude|3Jn|3Jean)
+
+--- init eval
+{key=>'1',s2=>' ',c=>'1',cvs=>':',v=>'1', dash=>'-',key2=>'2',s7=>' ',c2=>'2',v2=>'5'}
+--- result eval
+{
+    'data' => {
+	'key' => '1',
+	'c' => '1',
+	'v' => '1',
+	'key2' => '2',
+	'c2' => '2',
+	'v2' => '5',
+    },
+    'original' => {
+	'c'  => '1',
+	'v'  => '1',
+	'c2' => '2',
+	'v2' => '5',
+    },
+    'spaces' => {
+	's2' => ' ',
+	's7' => ' ',
+    },
+    'info' => {
+	'cvs' =>':',
+	'dash' => '-',
+    }
 }
