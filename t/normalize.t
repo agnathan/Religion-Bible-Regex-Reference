@@ -61,7 +61,7 @@ run {
 __END__
 === Parse LCVLCV - Genèse 1:1-Exode 2:5
 --- reference chomp
-Genèse 1:1-Exode 2:5
+Ge 1:1-Ex 2:5
 --- expected chomp
 Genèse 1:1-Exode 2:5
 === Parse LCLCV - Genèse 1-Exode 2:5

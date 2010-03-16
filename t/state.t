@@ -69,6 +69,8 @@ CHAPTER
     'original' => {
         'c' => '8',
         'v' => '15',
+        'text' => 'voir 8:15',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -99,6 +101,8 @@ Ge 1:1-Ex 2:5
 	'b2' => 'Ex',	    
 	'c2' => '2',
 	'v2' => '5',
+        'text' => 'Ge 1:1-Ex 2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -129,6 +133,8 @@ Ge 1:1-Ex 2:5
 	'b2' => 'Ex',	    
 	'c2' => '2',
 	'v2' => '5',
+        'text' => 'Ge 1:1-Ex 2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -156,7 +162,9 @@ Ge 1:5-Ex 2
 	'c' => '1',
 	'v' => '5',
 	'b2' => 'Ex',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => 'Ge 1:5-Ex 2',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -183,7 +191,9 @@ Ge 1-Ex 2
 	'b' => 'Ge',
 	'c' => '1',
 	'b2' => 'Ex',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => 'Ge 1-Ex 2',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -206,6 +216,8 @@ Ge 1
     'original' => {
 	'b' => 'Ge',
 	'c' => '1',
+        'text' => 'Ge 1',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -228,7 +240,9 @@ Ge 1:1-2:5
 	'c' => '1',
 	'v' => '1',
 	'v2' => '5',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => 'Ge 1:1-2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -253,7 +267,9 @@ Ge 1-2:5
 	'b' => 'Ge',
 	'c' => '1',
 	'v2' => '5',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => 'Ge 1-2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -277,7 +293,9 @@ Ge 1-2
     'original' => {
 	'b' => 'Ge',
 	'c' => '1',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => 'Ge 1-2',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -299,6 +317,8 @@ Ge 1
     'original' => {
 	'b' => 'Ge',
 	'c' => '1',
+        'text' => 'Ge 1',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -323,6 +343,8 @@ CHAPTER
 	'v' => '1',
 	'c2' => '2',
 	'v2' => '5',
+        'text' => '1:1-2:5',
+        'context' => 'CHAPTER',
     },
     'info' => {
 	'cvs' =>':',
@@ -345,6 +367,8 @@ CHAPTER
 	'c' => '1',
 	'c2' => '2',
 	'v2' => '5',
+        'text' => '1-2:5',
+        'context' => 'CHAPTER',
     },
     'info' => {
 	'cvs' =>':',
@@ -364,7 +388,9 @@ CHAPTER
     },
     'original' => {
 	'c' => '1',
-	'c2' => '2'
+	'c2' => '2',
+        'text' => '1-2',
+        'context' => 'CHAPTER',
     },
     'info' => {
 	'dash' => '-',
@@ -382,6 +408,8 @@ CHAPTER
     },
     'original' => {
 	'c' => '1',
+        'text' => '1',
+        'context' => 'CHAPTER',
     },
 }
 === Parse VV - 1-2
@@ -398,6 +426,8 @@ VERSE
     'original' => {
 	'v' => '1',
 	'v2' => '2',
+        'text' => '1-2',
+        'context' => 'VERSE',
     },
     'info' => {
 	'dash' => '-',
@@ -415,6 +445,8 @@ VERSE
     },
     'original' => {
 	'v' => '1',
+        'text' => '1',
+        'context' => 'VERSE',
     }
 }
 === Parse a book that has only one chapter - Jude 4
@@ -433,6 +465,8 @@ VERSE
 	'b'  => 'Jude',
 	'c' => '1',
 	'v'  => '4',
+        'text' => 'Jude 4',
+        'context' => 'BOOK',
     },
     'spaces' => {
 	's2' => ' ',
@@ -457,6 +491,8 @@ VERSE
         'b'  => 'Jude',
         'c' => '1',
         'v'  => '4',
+        'text' => 'Jude 1:4',
+        'context' => 'BOOK',
     },
     'spaces' => {
         's2' => ' ',
@@ -483,6 +519,8 @@ voir 1:1-2:5
 	'v'  => '1',
 	'c2' => '2',
 	'v2' => '5',
+        'text' => 'voir 1:1-2:5',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
 	's2' => ' ',
@@ -507,6 +545,8 @@ voir aussi 1-2:5
 	'c' => '1',
 	'c2' => '2',
 	'v2' => '5',
+        'text' => 'voir aussi 1-2:5',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
 	's2' => ' ',
@@ -532,6 +572,8 @@ voir aussi 1-2:5
         'c' => '1',
         'c2' => '2',
         'v2' => '5',
+        'text' => 'voir aussi 1-2:5',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -557,6 +599,8 @@ CHAPTER
     'original' => {
 	'c' => '8',
 	'v' => '15',
+        'text' => 'voir 8:15',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -582,6 +626,8 @@ VERSE
     'original' => {
 	'v' => '1',
 	'v2' => '2',
+        'text' => 'vv. 1-2',
+        'context' => 'VERSE',
     },
     'spaces' => {
 	's2' => ' ',
@@ -604,6 +650,8 @@ VERSE
     },
     'original' => {
 	'v' => '1',
+        'text' => 'voir aussi v. 1',
+        'context' => 'VERSE',
     },
     'spaces' => {
 	's2' => ' ',

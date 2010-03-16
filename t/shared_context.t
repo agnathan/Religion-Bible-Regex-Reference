@@ -62,9 +62,9 @@ run {
     
     $r1->parse($block->ref1, $block->ref1state);    
     $r2->parse($block->ref2, $block->ref2state);    
-    my $i = $r1->shared_state($r2);
 
     is($r1->shared_state($r2), $block->result, $block->name);
+#    is($r1->shared_state($r2)->original_text, $r1->original_text, $block->name);
 };
 
 __END__

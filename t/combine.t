@@ -3,7 +3,7 @@ use utf8;
 use Data::Dumper;
 no warnings;
 
-plan tests => 349;
+plan tests => 350;
     
 my $yaml = <<"YAML";
 books:
@@ -55,16 +55,29 @@ my $b = new Religion::Bible::Regex::Builder($c);
 
 run {
     my $block = shift;
-    my $r1 = new Religion::Bible::Regex::Reference($c, $b);	
-    my $r2 = new Religion::Bible::Regex::Reference($c, $b);	
-    
+    my $r1 = new Religion::Bible::Regex::Reference($c, $b);
+    my $r2 = new Religion::Bible::Regex::Reference($c, $b);
+
     $r1->parse($block->ref1, $block->ref1state);    
-    $r2->parse($block->ref2, $block->ref2state);    
+    $r2->parse($block->ref2, \$r1);    
 
     is($r1->combine($r2)->formatted_normalize, $block->result, $block->name);
 };
 
+
+
 __END__
+=== combine LCVLCV,CCV - Ge 2:5-Ex 6:7, 12-13:5
+--- ref1 chomp
+Ge 2:5-Ex 6:7
+--- ref2 chomp
+12-13:5
+--- ref2state chomp
+CHAPTER
+--- result chomp
+Ex 12-13:5
+
+
 === combine LCV,CV - Ge 4:5, 8:15
 --- ref1 chomp
 Ge 4:5
@@ -1986,195 +1999,195 @@ Ge 12
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 12-13:5
+voir Ex 12-13:5
 
 === combine LCVLC,CCV - Ge 2:5-Ex 6, 12-13:5
 --- ref1 chomp
 Ge 2:5-Ex 6
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 12-13:5
+voir Ex 12-13:5
 
 === combine LCLCV,CCV - Ge 2-Ex 6:7, 12-13:5
 --- ref1 chomp
 Ge 2-Ex 6:7
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- result chomp
-Ex 12-13:5
+voir Ex 12-13:5
 
 === combine LCLC,CCV - Ge 2-Ex 6, 12-13:5
 --- ref1 chomp
 Ge 2-Ex 6
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 12-13:5
+voir Ex 12-13:5
 
 === combine LCCV,CCV - Ge 2-6:4, 12-13:5
 --- ref1 chomp
 Ge 2-6:4
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LCC,CCV - Ge 3-9, 12-13:5
 --- ref1 chomp
 Ge 3-9
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LCVCV,CCV - Ge 2:8-6:4, 12-13:5
 --- ref1 chomp
 Ge 2:8-6:4
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LCVV,CCV - Ge 2:8-10, 12-13:5
 --- ref1 chomp
 Ge 2:8-10
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LCV,CCV - Ge 4:5, 12-13:5
 --- ref1 chomp
 Ge 4:5
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LC,CCV - Ge 12, 12-13:5
 --- ref1 chomp
 Ge 12
 --- ref2 chomp
-12-13:5
+voir 12-13:5
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 12-13:5
+voir Ge 12-13:5
 
 === combine LCVLCV,CC - Ge 2:5-Ex 6:7, 10-11
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 10-11
+voir Ex 10-11
 
 === combine LCVLC,CC - Ge 2:5-Ex 6, 10-11
 --- ref1 chomp
 Ge 2:5-Ex 6
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 10-11
+voir Ex 10-11
 
 === combine LCLCV,CC - Ge 2-Ex 6:7, 10-11
 --- ref1 chomp
 Ge 2-Ex 6:7
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 10-11
+voir Ex 10-11
 
 === combine LCLC,CC - Ge 2-Ex 6, 10-11
 --- ref1 chomp
 Ge 2-Ex 6
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 10-11
+voir Ex 10-11
 
 === combine LCCV,CC - Ge 2-6:4, 10-11
 --- ref1 chomp
 Ge 2-6:4
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine LCC,CC - Ge 3-9, 10-11
 --- ref1 chomp
 Ge 3-9
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine LCVCV,CC - Ge 2:8-6:4, 10-11
 --- ref1 chomp
 Ge 2:8-6:4
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine LCVV,CC - Ge 2:8-10, 10-11
 --- ref1 chomp
 Ge 2:8-10
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine LCV,CC - Ge 4:5, 10-11
 --- ref1 chomp
 Ge 4:5
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine LC,CC - Ge 12, 10-11
 --- ref1 chomp
 Ge 12
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 10-11
+voir Ge 10-11
 
 === combine CCV,CC - 12-13:5, 10-11
 --- ref1 chomp
@@ -2182,23 +2195,23 @@ Ge 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine CC,CC - 10-11, 10-11
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine CVCV,CC - 1:5-3:11, 10-11
 --- ref1 chomp
@@ -2206,11 +2219,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine CVV,CC - 9:5-11, 10-11
 --- ref1 chomp
@@ -2218,11 +2231,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine CV,CC - 8:15, 10-11
 --- ref1 chomp
@@ -2230,11 +2243,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine C,CC - 7, 10-11
 --- ref1 chomp
@@ -2242,11 +2255,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine VV,CC - 8-14, 10-11
 --- ref1 chomp
@@ -2254,11 +2267,11 @@ CHAPTER
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 === combine V,CC - 3, 10-11
 --- ref1 chomp
@@ -2266,11 +2279,11 @@ CHAPTER
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-10-11
+voir 10-11
 --- ref2state chomp
 CHAPTER
 --- result chomp
-10-11
+voir 10-11
 
 
 
@@ -2388,7 +2401,7 @@ CHAPTER
 
 === combine CC,CVCV - 10-11, 1:5-3:11
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
@@ -2585,7 +2598,7 @@ CHAPTER
 
 === combine CC,CVV - 10-11, 9:5-11
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
@@ -2783,7 +2796,7 @@ CHAPTER
 
 === combine CC,CV - 10-11, 8:15
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
@@ -2868,101 +2881,101 @@ CHAPTER
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 7
+voir Ex 7
 
 === combine LCVLC,C - Ge 2:5-Ex 6, 7
 --- ref1 chomp
 Ge 2:5-Ex 6
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 7
+voir Ex 7
 
 === combine LCLCV,C - Ge 2-Ex 6:7, 7
 --- ref1 chomp
 Ge 2-Ex 6:7
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 7
+voir Ex 7
 
 === combine LCLC,C - Ge 2-Ex 6, 7
 --- ref1 chomp
 Ge 2-Ex 6
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ex 7
+voir Ex 7
 
 === combine LCCV,C - Ge 2-6:4, 7
 --- ref1 chomp
 Ge 2-6:4
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine LCC,C - Ge 3-9, 7
 --- ref1 chomp
 Ge 3-9
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine LCVCV,C - Ge 2:8-6:4, 7
 --- ref1 chomp
 Ge 2:8-6:4
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine LCVV,C - Ge 2:8-10, 7
 --- ref1 chomp
 Ge 2:8-10
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine LCV,C - Ge 4:5, 7
 --- ref1 chomp
 Ge 4:5
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine LC,C - Ge 12, 7
 --- ref1 chomp
 Ge 12
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-Ge 7
+voir Ge 7
 
 === combine CCV,C - 12-13:5, 7
 --- ref1 chomp
@@ -2970,23 +2983,23 @@ Ge 7
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine CC,C - 10-11, 7
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine CVCV,C - 1:5-3:11, 7
 --- ref1 chomp
@@ -2994,11 +3007,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine CVV,C - 9:5-11, 7
 --- ref1 chomp
@@ -3006,11 +3019,11 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine CV,C - 8:15, 7
 --- ref1 chomp
@@ -3018,47 +3031,47 @@ CHAPTER
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine C,C - 7, 7
 --- ref1 chomp
-7
+v. 7
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine VV,C - 8-14, 7
 --- ref1 chomp
-8-14
+vv. 8-14
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 === combine V,C - 3, 7
 --- ref1 chomp
-3
+v. 3
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-7
+voir 7
 --- ref2state chomp
 CHAPTER
 --- result chomp
-7
+voir 7
 
 
 
@@ -3066,137 +3079,137 @@ CHAPTER
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:8-14
+vv. Ex 6:8-14
 
 === combine LCVLC,VV - Ge 2:5-Ex 6, 8-14
 --- ref1 chomp
 Ge 2:5-Ex 6
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:8-14
+vv. Ex 6:8-14
 
 === combine LCLCV,VV - Ge 2-Ex 6:7, 8-14
 --- ref1 chomp
 Ge 2-Ex 6:7
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:8-14
+vv. Ex 6:8-14
 
 === combine LCLC,VV - Ge 2-Ex 6, 8-14
 --- ref1 chomp
 Ge 2-Ex 6
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:8-14
+vv. Ex 6:8-14
 
 === combine LCCV,VV - Ge 2-6:4, 8-14
 --- ref1 chomp
 Ge 2-6:4
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 6:8-14
+vv. Ge 6:8-14
 
 === combine LCC,VV - Ge 3-9, 8-14
 --- ref1 chomp
 Ge 3-9
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 9:8-14
+vv. Ge 9:8-14
 
 === combine LCVCV,VV - Ge 2:8-6:4, 8-14
 --- ref1 chomp
 Ge 2:8-6:4
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 6:8-14
+vv. Ge 6:8-14
 
 === combine LCVV,VV - Ge 2:8-10, 8-14
 --- ref1 chomp
 Ge 2:8-10
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 2:8-14
+vv. Ge 2:8-14
 
 === combine LCV,VV - Ge 4:5, 8-14
 --- ref1 chomp
 Ge 4:5
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 4:8-14
+vv. Ge 4:8-14
 
 === combine LC,VV - Ge 12, 8-14
 --- ref1 chomp
 Ge 12
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 12:8-14
+vv. Ge 12:8-14
 
 === combine CCV,VV - 12-13:5, 8-14
 --- ref1 chomp
-12-13:5
+voir 12-13:5
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-13:8-14
+vv. 13:8-14
 
 === combine CC,VV - 10-11, 8-14
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-11:8-14
+vv. 11:8-14
 
 === combine CVCV,VV - 1:5-3:11, 8-14
 --- ref1 chomp
-1:5-3:11
+voir 1:5-3:11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-3:8-14
+vv. 3:8-14
 
 === combine CVV,VV - 9:5-11, 8-14
 --- ref1 chomp
@@ -3204,23 +3217,23 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-9:8-14
+vv. 9:8-14
 
 === combine CV,VV - 8:15, 8-14
 --- ref1 chomp
-8:15
+voir 8:15
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-8:8-14
+vv. 8:8-14
 
 === combine C,VV - 7, 8-14
 --- ref1 chomp
@@ -3228,35 +3241,35 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-7:8-14
+vv. 7:8-14
 
 === combine VV,VV - 8-14, 8-14
 --- ref1 chomp
-8-14
+vv. 8-14
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-8-14
+vv. 8-14
 
 === combine V,VV - 3, 8-14
 --- ref1 chomp
-3
+vv. 3
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-8-14
+vv. 8-14
 --- ref2state chomp
 VERSE
 --- result chomp
-8-14
+vv. 8-14
 
  
  
@@ -3264,111 +3277,111 @@ VERSE
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:3
+vv. Ex 6:3
 
 === combine LCVLC,V - Ge 2:5-Ex 6, 3
 --- ref1 chomp
 Ge 2:5-Ex 6
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:3
+vv. Ex 6:3
 
 === combine LCLCV,V - Ge 2-Ex 6:7, 3
 --- ref1 chomp
 Ge 2-Ex 6:7
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:3
+vv. Ex 6:3
 
 === combine LCLC,V - Ge 2-Ex 6, 3
 --- ref1 chomp
 Ge 2-Ex 6
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:3
+vv. Ex 6:3
 
 === combine LCVLCV, V - Ge 2:5-Ex 6:7, 3
 --- ref1 chomp
 Ge 2:5-Ex 6:7
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ex 6:3
+vv. Ex 6:3
 
 === combine LCCV,V - Ge 2-6:4, 3
 --- ref1 chomp
 Ge 2-6:4
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 6:3
+vv. Ge 6:3
 
 === combine LCC,V - Ge 3-9, 3
 --- ref1 chomp
 Ge 3-9
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 9:3
+vv. Ge 9:3
 
 === combine LCVCV,V - Ge 2:8-6:4, 3
 --- ref1 chomp
 Ge 2:8-6:4
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 6:3
+vv. Ge 6:3
 
 === combine LCVV,V - Ge 2:8-10, 3
 --- ref1 chomp
 Ge 2:8-10
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 2:3
+vv. Ge 2:3
 
 === combine LCV,V - Ge 4:5, 3
 --- ref1 chomp
 Ge 4:5
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 4:3
+vv. Ge 4:3
 
 === combine LC,V - Ge 12, 3
 --- ref1 chomp
 Ge 12
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-Ge 12:3
+vv. Ge 12:3
 
 === combine CCV,V - 12-13:5, 3
 --- ref1 chomp
@@ -3376,23 +3389,23 @@ Ge 12:3
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-13:3
+vv. 13:3
 
 === combine CC,V - 10-11, 3
 --- ref1 chomp
-10-11
+voir 10-11
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-11:3
+vv. 11:3
 
 === combine CVCV,V - 1:5-3:11, 3
 --- ref1 chomp
@@ -3400,11 +3413,11 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-3:3
+vv. 3:3
 
 === combine CVV,V - 9:5-11, 3
 --- ref1 chomp
@@ -3412,11 +3425,11 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-9:3
+vv. 9:3
 
 === combine CV,V - 8:15, 3
 --- ref1 chomp
@@ -3424,11 +3437,11 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-8:3
+vv. 8:3
 
 === combine C,V - 7, 3
 --- ref1 chomp
@@ -3436,11 +3449,11 @@ VERSE
 --- ref1state chomp
 CHAPTER
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-7:3
+vv. 7:3
 
 === combine VV,V - 8-14, 3
 --- ref1 chomp
@@ -3448,23 +3461,23 @@ VERSE
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-3
+vv. 3
 
 === combine V,V - 3, 3
 --- ref1 chomp
-3
+vv. 3
 --- ref1state chomp
 VERSE
 --- ref2 chomp
-3
+vv. 3
 --- ref2state chomp
 VERSE
 --- result chomp
-3
+vv. 3
 
  
 

@@ -1,45 +1,776 @@
-Religion-Bible-Regex-Reference version 0.0.1
+Religion::Bible::Regex::Reference 
 
-[ REPLACE THIS...
+          o Explicit and Implicit Bible Reference Types
+                +
+          +
+          o Explaination of the Parts of a Bible Reference
+                + Reference Parts
+                + Spaces in a Bible Reference 
+    * INTERFACE
+          o new
+          o get_configuration
+          o get_regexes
+          o get_reference_hash
+          o reference
+          o is_explicit
+          o set
+          o set_b
+          o set_c
+          o set_v
+          o set_b2
+          o set_c2
+          o set_v2
+          o set_cvs
+          o set_cvs2
+          o set_dash
+          o set_s2
+          o set_s3
+          o set_s4
+          o set_s5
+          o set_s6
+          o set_s7
+          o set_s8
+          o set_s9
+          o key
+          o c
+          o v
+          o key2
+          o c2
+          o v2
+          o cvs
+          o dash
+          o ob
+          o ob2
+          o oc
+          o oc2
+          o ov
+          o ov2
+          o s2
+          o s3
+          o s4
+          o s5
+          o s6
+          o s7
+          o s8
+          o s9
+          o book
+          o book2
+          o abbreviation
+          o abbreviation2
+          o formatted_c
+          o formatted_c2
+          o formatted_context_words
+          o formatted_cvs
+          o formatted_cvs2
+          o formatted_interval
+          o formatted_v
+          o formatted_v2
+          o abbreviation2book
+          o abbreviation2key
+          o book2abbreviation
+          o book2key
+          o key2abbreviation
+          o key2book
+          o book_type
+          o formatted_book
+          o formatted_book2
+          o compare
+          o gt
+          o lt
+          o interval
+          o min
+          o max
+          o has_interval
+          o begin_interval_reference
+          o end_interval_reference
+          o combine
+                + normalize 
 
-  The README is used to introduce the module and provide instructions on
-  how to install the module, any machine dependencies it may have (for
-  example C compilers and installed libraries) and any other information
-  that should be understood before the module is installed.
+        'L' stands for 'Livre'    ('Book' in English)
+        'C' stands for 'Chapitre' ('Chapter' in English)
+        'V' stands for 'Verset'   ('Verse' in English)
 
-  A README file is required for CPAN modules since CPAN extracts the
-  README file from a module distribution so that people browsing the
-  archive can use it get an idea of the modules uses. It is usually a
-  good idea to provide version information here so that people can
-  decide whether fixes for the module are worth downloading.
-]
+Here are the different Bible reference types with an example following each one:
+
+        # Explicit Bible Reference Types
+        LCVLCV Ge 1:1-Ex 1:1
+        LCVCV  Ge 1:1-2:1
+        LCCV   Ge 1-2:5
+        LCVV   Ge 1:2-5
+        LCV    Ge 1:1
+        LCC    Ge 1-12
+        LC     Ge 1        
+                
+        # Implicit Bible Reference Types
+        CVCV   1:1-2:1
+        CCV    1-2:5
+        CVV    1:2-5
+        CV     1:1
+        CC     1-12
+        C      1
+        VV     1-5
+        V      1
+
+Explicit and Implicit Bible Reference Types
+
+We say the Bible reference is explicit when it has enough information within the reference to identify an exact location within the Bible.
+
+Examples of explicit Bible references include:
+
+Genesis 1:1 Ge 1:1 Ge 1 Genesis 1
+
+An explicit reference must have a book and a chapter but not necessarily a verse.
+
+We say that a Bible reference is implicit when the reference itself does not contain enough information to find its location in the Bible. often times within a commentary we will find implicit Bible references that use the context of the text to identify the Bible reference.
+
+Examples of implicit Bible references include:
+
+    in Chapter 4
+    in verse 17
+    see 4:17
+    as we see in chapter 5
+    (4:7)
+
+An implicit preference must be proceeded by some identifying phrase or character(s), referred to as the context word(s). Context words allow these Bible reference objects to identify and distinguish him between Bible references and other numbers that might be in the text of the commentary.
+
+In the examples above the context words are respectively:
+
+    'in Chapter'
+    'in verse'
+    'see'
+    'as we see in chapter'
+    '('
+
+Explaination of the Parts of a Bible Reference
+
+When a Bible reference is parsed it is divided up into a number of different parts as follows:
+
+First of all, a Bible reference can have an interval. Both sides of the interval, '-' can have a book, chapter and verse. For example, 'Genesis 1:1 - Revelation 22:21', 'Ge 1:1-2:3', and 'Ge 1:1-5' are all verses with intervals.
+Reference Parts
+
+key: A key is a unique numeric identifier which is defined in the configuration file for a particular book of the Bible. For example, Genesis is often defined as '1'. any alternative spellings and abbreviations will also map to this number. So for example, if the configuration file defines the book of Genesis with French spellings like this:
+
+     books:
+       1: 
+         Match:
+           Book: ['GenÃ¨se', 'Genese']
+           Abbreviation: ['Ge']
+         Normalized: 
+           Book: GenÃ¨se
+           Abbreviation: Ge
+          
+     Then 'GenÃ¨se', 'Genese', 'Ge' would all map to a key value of '1'.
+
+c : this is the chapter in the beginning part of the reference. For example, for 'Genesis 11', c is '11' for 'Genesis 1-11', c is '1' for 'Romans 3:23', c is '3'
+
+v : this is the verse in the beginning part of the reference. For example, for 'John 14:6', v is '6'. for 'John 3:16', v is '16'. for 'Psalm 23:1-3', v is '1'
+
+cvs : Chapter And Verse Separator In most English Bibles this character is a ':'. Often in Europe the '.' character is used as a separator. For example,
+
+      'Ephesians 2:8', cvs is ':'
+      'Actes 1.8', cvs is '.'
+
+cvs2 : Chapter And Verse Separator for the interval part of the Bible reference In most English Bibles this character is a ':'. Often in Europe the '.' character is used as a separator. For example,
+
+      'Ephesians 2:8-3:10', cvs is ':'
+      'Actes 1.8-2.1', cvs is '.'
+
+dash : the interval operator. In most English Bibles this character is simply a '-'. However in many European Bibles a long dash is used if the interval separates two chapters, and a normal dash is used if the interval is between two verses.
+
+        'Genesis 1:1 - Revelation 22:21', dash is '-'.
+
+key2 : The same as key except used when this Bible verse has an interval. So for example, if the configuration file defines the book of Genesis with French spellings like this:
+
+     books:
+       1: 
+         Match:
+           Book: ['GenÃ¨se', 'Genese']
+           Abbreviation: ['Ge']
+         Normalized: 
+           Book: GenÃ¨se
+           Abbreviation: Ge
+      
+       66: 
+         Match:
+           Book: ['Revelation']
+           Abbreviation: ['Re', 'Rev']
+         Normalized: 
+             Book: Revelation
+            Abbreviation: Re
+                  
+       for example, for 'Genesis 1:1 - Revelation 22:21', key2 is '66'.
+
+c2 : The same as c except this is the chapter when this Bible verse has an interval.
+
+For example,
+
+        'Genesis 1:1 - Revelation 22:21', c2 is '22'.
+
+v2 : The same as v except this is the verse when this Bible verse has an interval.
+
+For example,
+
+        'Genesis 1:1 - Revelation 22:21', v2 is '21'.
+
+Spaces in a Bible Reference
+
+The various parts of the Bible verse may have spaces, (ascii 32), or non-breakable spaces, (ascii 160), between them.
+
+Here they are defined as s2, s3, s4, s5, s6, s7, s8 and s9. There are no spaces defined before or after a Bible verse, which is why s1 and s10 are no longer present.
+
+Spaces are defined like this on a LCVLCV reference.
+
+        L(s2)C(s3):(s4)V(s5)-(s6)L2(s7)C2(s8):(s9)V2
+        s2 : between L and C
+        s3 : between C and the CVS
+        s4 : between CVS and V
+        s5 : between V and the dash
+        s6 : between the dash and L2
+        s7 : between L2 and C2
+        s8 : between C2 and CVS2
+        s9 : between CVS2 and V2
+
+INTERFACE ^
+new
+
+Creates a new Religion::Bible::Regex::Reference. Requires two parameters a Religion::Bible::Regex::Config object and a Religion::Bible::Regex::Regex object
+get_configuration
+
+Returns the Religion::Bible::Regex::Config object used by this reference.
+get_regexes
+
+Returns the Religion::Bible::Regex::Builder object used by this reference.
+get_reference_hash
+
+Returns the hash that contains all of the parts of the current Bible reference.
+reference
+
+An alias for get_reference_hash
+is_explicit
+
+Returns true if all the information is there to reference an exact verse or verses in the Bible.
+set
+
+Takes a hash and uses it to define a Bible reference.
+
+For example, this hash defines the LCVLCV reference, Ge 1:1-Ex 2:5. {b=>'Ge',s2=>' ',c=>'1',cvs=>':',v=>'1', dash=>'-',b2=>'Ex',s7=>' ',c2=>'2',v2=>'5'}
+set_b
+
+    This function takes a book or an abbreviation as defined under the Match sections in the configurations file and sets the key. 
+    Use this function because when you're parsing a Bible reference this function this function will be able to set the correct
+book whether you pass it an abbreviation or a book name based upon the possible defined spellings of each. 
+
+For example given the configuration:
+
+     books:
+       1: 
+         Match:
+           Book: ['GenÃ¨se', 'Genese']
+           Abbreviation: ['Ge']
+         Normalized: 
+           Book: GenÃ¨se
+           Abbreviation: Ge
+
+     set_b('Ge'), set_b('GenÃ¨se') and set_b('Genese') all set the key to '1'
+
+set_c
+
+This function sets the chapter for a Bible reference.
+set_v
+
+This function sets the verse for a Bible reference.
+set_b2
+
+The same as set_b except used on the interval section of a Bible reference. This function takes a book or an abbreviation as defined under the Match sections in the configurations file and sets the key2.
+set_c2
+
+Sets the chapter for the interval part of the Bible reference.
+set_v2
+
+Sets the verse for the interval part of the Bible reference.
+set_cvs
+
+Sets CVS for the interval part of the Bible reference.
+set_cvs2
+
+Sets the CVS for the interval part of the Bible reference.
+set_dash
+
+Sets the DASH for the Bible reference.
+set_s2
+
+Sets s2
+set_s3
+
+Sets s3
+set_s4
+
+Sets s4
+set_s5
+
+Sets s5
+set_s6
+
+Sets s6
+set_s7
+
+Sets s7
+set_s8
+
+Sets s8
+set_s9
+
+Sets s9
+key
+
+Returns key
+c
+
+Returns c
+v
+
+Returns v
+key2
+
+Returns key2
+c2
+
+Returns c2
+v2
+
+Returns v2
+cvs
+
+Returns the cvs for a reference.
+dash
+
+Returns the dash for a reference.
+ob
+
+Returns the original book or abbreviation
+ob2
+
+Returns the original book or abbreviation for the intervale part of the reference
+oc
+
+Returns the original chapter
+oc2
+
+Returns the original chapter for the intervale part of the reference
+ov
+
+Returns the original verse
+ov2
+
+Returns the original verse for the intervale part of the reference
+s2
+
+Returns s2
+s3
+
+Returns s3
+s4
+
+Returns s4
+s5
+
+Returns s5
+s6
+
+Returns s6
+s7
+
+Returns s7
+s8
+
+Returns s8
+s9
+
+Returns s9
+book
+
+Returns the canonical book defined by the key
+book2
+
+Returns the canonical book defined by the key for the intervale part of the reference.
+abbreviation
+
+Returns the normalize abbreviation for a reference.
+abbreviation2
+
+Returns the normalize abbreviation for a reference for the intervale part of the reference.
+formatted_c
+
+Returns the chapter as a number. Usually this is the same as the getter $self->c except when $self->c is a roman number.
+formatted_c2
+
+Returns the chapter as a number for the intervale part of the reference. Usually this is the same as the getter $self->c2 except when $self->c2 is a roman number.
+formatted_context_words
+
+Returns the context words. context words or phrases that begin an implicit biblical reference. For example, 'in the chapter', or 'see verses'.
+formatted_cvs
+
+This function follows the following rules to return a chapter for separator:
+
+If a chapter and a verse are defined and the configuration file defines a character to use for the CVS then return it. Otherwise returns the CVS character that was parsed from the original reference. otherwise return ':'
+
+If the chapter and verse are not defined then return a null string.
+formatted_cvs2
+
+This function follows the following rules to return a chapter for separator:
+
+If a chapter and a verse are defined and the configuration file defines a character to use for the CVS then return it. Otherwise returns the CVS character that was parsed from the original reference. otherwise return ':'
+
+If the chapter and verse are not defined then return a null string.
+formatted_interval
+
+This function follows the following rules to return a chapter for separator:
+
+If any part of the interval part of the Bible verse is defined then return the dash character defined in the configuration file. Otherwise returns the dash character that was parsed from the original reference. otherwise return '-'
+
+If The current reference has no interval and then return a null string.
+formatted_v
+
+Returns the verse as a number. Usually this is the same as the getter $self->v except when $self->v is a roman number.
+formatted_v2
+
+Returns the verse as a number for the intervale part of the reference. Usually this is the same as the getter $self->v2 except when $self->v2 is a roman number.
+abbreviation2book
+
+Given any of the abbreviations defined under the match section of a reference in the configuration file, then returned its normalized book name.
+abbreviation2key
+
+Given any of the abbreviations defined under the match section of a reference in the configuration file, then returned its key.
+book2abbreviation
+
+Given any of the book names defined under the match section of a reference in the configuration file, then returned its normalized abbreviation.
+book2key
+
+Given any of the book names defined under the match section of a reference in the configuration file, then returned its key.
+key2abbreviation
+
+Given the key of a reference defined under the match section in the configuration file, then returned its normalize abbreviation.
+key2book
+
+Given the key of a reference defined under the match section in the configuration file, then returned its normalize book name.
+book_type
+
+If this reference is implicit then this function returns 'NONE'. For example, the reference 'see verse 5:1' returns a book_type of 'NONE'.
+
+If the original reference that was parsed contained an abbreviation for a book of the Bible then this returns 'ABBREVIATION'. For example, the reference 'Ro 12:16' returns a book_type of 'ABBREVIATION'.
+
+If the original reference that was parsed contained a book name then this returns 'CANONICAL_NAME'. For example, the reference 'Ephesians 4:32' returns a book_type of 'CANONICAL_NAME'.
+formatted_book
+
+This function checks to see if the originally parsed reference was of type 'CANONICAL_NAME' or 'ABBREVIATION' and then returns the corresponding normalized book name or abbreviation for book.
+formatted_book2
+
+This function checks to see if the originally parsed reference was of type 'CANONICAL_NAME' or 'ABBREVIATION' and then returns the corresponding normalized book name or abbreviation for book2.
+compare
+
+Given two references, this function returns -1 if the first reference is before the second reference, 0 if the references are identical, and 1 if the first reference is after the second.
+
+For example, given this configuration file:
+
+             books:
+               1: 
+                 Match:
+                   Book: ['GenÃ¨se', 'Genese']
+                   Abbreviation: ['Ge']
+                 Normalized: 
+                   Book: GenÃ¨se
+                   Abbreviation: Ge
+              
+               66: 
+                 Match:
+                   Book: ['Revelation']
+                   Abbreviation: ['Re', 'Rev']
+                 Normalized: 
+                     Book: Revelation
+            Abbreviation: Re
+
+and these references
+
+        $ref1->parse('Genesis 1:1');
+        $ref2->parse('Revelation 22:21');
+        $ref1->compare($ref2);
+
+This function first compares their keys, which are respectively '1' and '66'. Since 1 < 66, compare returns '-1' which means the first reference is before the second reference.
+gt
+
+Given two references, this function returns nil if the first reference is after the second reference, and 1 if the first reference is before or identical to the second reference.
+
+For example, given this configuration file:
+
+             books:
+               1: 
+                 Match:
+                   Book: ['GenÃ¨se', 'Genese']
+                   Abbreviation: ['Ge']
+                 Normalized: 
+                   Book: GenÃ¨se
+                   Abbreviation: Ge
+              
+               66: 
+                 Match:
+                   Book: ['Revelation']
+                   Abbreviation: ['Re', 'Rev']
+                 Normalized: 
+                     Book: Revelation
+            Abbreviation: Re
+
+and these references
+
+        $ref1->parse('Genesis 1:1');
+        $ref2->parse('Revelation 22:21');
+        $ref1->gt($ref2);
+
+This function first compares their keys, which are respectively '1' and '66'. Since 1 < 66, gt returns nil which means the first reference is not after the second reference.
+lt
+
+Given two references, this function returns '1' if the first reference is before the second reference, and nil if the first reference is after or identical to the second reference.
+
+For example, given this configuration file:
+
+             books:
+               1: 
+                 Match:
+                   Book: ['GenÃ¨se', 'Genese']
+                   Abbreviation: ['Ge']
+                 Normalized: 
+                   Book: GenÃ¨se
+                   Abbreviation: Ge
+              
+               66: 
+                 Match:
+                   Book: ['Revelation']
+                   Abbreviation: ['Re', 'Rev']
+                 Normalized: 
+                     Book: Revelation
+            Abbreviation: Re
+
+and these references
+
+        $ref1->parse('Genesis 1:1');
+        $ref2->parse('Revelation 22:21');
+        $ref1->lt($ref2);
+
+This function first compares their keys, which are respectively '1' and '66'. Since 1 < 66, gt returns '1' which means the first reference is before the second reference.
+interval
+
+Given two references this function returns one reference which is the interval of the two. The interval reference always sorts the two references.
+
+        $ref1->parse('Genesis 1:1');
+        $ref2->parse('Revelation 22:21');
+        
+        $ref3 = $ref1->interval($ref2);
+        print $ref3->normalize;   # Returns 'Genesis 1:1 - Revelation 22:21'
+
+        # If we reverse the order of the references note the output is correctly ordered with 'Genesis' before 'Revelation'     
+        $ref1->parse('Revelation 22:21');
+        $ref2->parse('Genesis 1:1');
+        
+        $ref3 = $ref1->interval($ref2);
+        print $ref3->normalize;   # Returns 'Genesis 1:1 - Revelation 22:21'
+
+min
+
+Given an array of references, this function returns the reference that is before all others.
+
+For example assuming the configuration file defines the book used below,
+
+        $ref1->parse('Galatians 5:13');
+        $ref2->parse('Colossians 3:16');        
+        $ref3->parse('1 Thessalonians 5:11');
+        $ref4->parse('James 5:16');     
+        
+        # $min is set to 'Galatians 5:13'
+        $min = $ref1->min($ref2, $ref3, $ref4);
+
+max
+
+Given an array of references, this function returns the reference that is after all others.
+
+For example assuming the configuration file defines the book used below,
+
+        $ref1->parse('Galatians 5:13');
+        $ref2->parse('Colossians 3:16');        
+        $ref3->parse('1 Thessalonians 5:11');
+        $ref4->parse('James 5:16');     
+        
+        # $max is set to 'James 5:16'
+        $max = $ref1->max($ref2, $ref3, $ref4);
+
+has_interval
+
+Returns '1' if a reference has an inteval component otherwise returns nil.
+
+        $ref1->parse('1 Peter 3:7-8')->has_interval;    # returns '1'
+        $ref2->parse('1 Peter 4:9')->has_interval;      # returns nil
+
+begin_interval_reference
+
+Given a reference with an interval, this function returns the beginning part of the reference.
+
+        $ref2 = $ref1->parse('Matthew 5:3-11')->begin_interval_reference;
+        print $ref2->normalize;    # Prints 'Matthew 5:3'
+
+        $ref2 = $ref1->parse('Matthew 16-17')->begin_interval_reference;
+        print $ref2->normalize;    # Prints 'Matthew 16'
+
+end_interval_reference
+
+Given a reference with an interval, this function returns the interval part of the reference.
+
+        $ref2 = $ref1->parse('Matthew 5:3-11')->end_interval_reference;
+        print $ref2->normalize;    # Prints 'Matthew 5:11'
+
+        $ref2 = $ref1->parse('Matthew 16-17')->end_interval_reference;
+        print $ref2->normalize;    # Prints 'Matthew 17'
+
+combine
+
+This functions combines two references using the context of the first reference to complete the second. This is useful when parsing references from commentaries or text.
+
+For example:
+
+If you are using the Religion::Bible::Regex::Lexer to parse a string like :
+
+        'Luke 23:26, 28'
+
+There are two references found 'Luke 23:26' and '28'.
+
+The combine function allows the you to combine 'Luke 23:26' and '28' to produce the reference 'Luke 23:28'.
+
+So the key and chapter of 'Luke 23:26' are transfered to 'Luke 23:28'.
+
+In general, if the second verse is implicit this function takes enough information from the first to make it an explicit reference.
+normalize
+
+Prints the Bible reference in a standardized way.
+
+First, the context words and book/abbreviation are printed. This is then followed by a space and then the chapter, cvs and verse. If there is an interval part then it's printed next.
+
+    For example:
+    John 3:16
+    Ge 1:1
+
+    =head2 n
+    =head2 bol
+
+    =head2 shared_state
+    =head2 state
+    =head2      context
+    =head2      context_is_book
+    =head2      context_is_chapitre
+    =head2      context_is_verset
+    =head2      context_words
+
+bol =head2 bolold =head2 context =head2 context_is_book =head2 context_is_chapitre =head2 context_is_verset =head2 context_words =head2 formatted_normalize =head2 n =head2 parse =head2 parse_chapitre =head2 parse_context_words =head2 parse_verset =head2 set_context_words =head2 shared_state =head2 state =head2 state_is_book =head2 state_is_chapitre =head2 state_is_verset =head2 set_key =head2 set_key2 =head2 set_ob =head2 set_ob2
+
+    Requires a hash of values to initalize the Bible reference. Optional argument a previous reference which can provide context for initializing a reference
+
+    =head2 state_is_verset
+
+    Returns true if the current the state is VERSE
+
+    =head2 state_is_chapitre
+
+    Returns true if the current the state is CHAPTER
+
+    =head2 state_is_book   
+
+    Returns true if the current the state is BOOK
+
+    =head2 parse
+    =head2 parse_chapitre
+    =head2 parse_verset
+    =head2 parse_context_words
+    =head2 set_context_words
+
+    =head1 DIAGNOSTICS
+
+    =for author to fill in:
+    List every single error and warning message that the module can
+    generate (even the ones that will "never happen"), with a full
+    explanation of each problem, one or more likely causes, and any
+    suggested remedies.
+
+    =over
+
+    =item C<< Error message here, perhaps with %s placeholders >>
+
+[Description of error here]
+
+    =item C<< Another error message here >>
+
+[Description of error here]
+
+[Et cetera, et cetera]
+
+    =back
+
+    =head1 CONFIGURATION AND ENVIRONMENT
+
+    =for author to fill in:
+    A full explanation of any configuration system(s) used by the
+    module, including the names and locations of any configuration
+    files, and the meaning of any environment variables or properties
+    that can be set. These descriptions must also include details of any
+    configuration language used.
+    
+    Religion::Bible::Regex::Reference requires no configuration files or environment variables.
+
+    =head1 DEPENDENCIES
+
+    =over 4
+
+    =item * Religion::Bible::Regex::Config
+
+    =item * Religion::Bible::Regex::Builder
+
+    =back
+
+    =head1 INCOMPATIBILITIES
+
+    =for author to fill in:
+    A list of any modules that this module cannot be used in conjunction
+    with. This may be due to name conflicts in the interface, or
+    competition for system or program resources, or due to internal
+    limitations of Perl (for example, many modules that use source code
+                         filters are mutually incompatible).
+
+    None reported.
 
 
-INSTALLATION
+    =head1 BUGS AND LIMITATIONS
 
-To install this module, run the following commands:
+    =for author to fill in:
+    A list of known problems with the module, together with some
+    indication Whether they are likely to be fixed in an upcoming
+    release. Also a list of restrictions on the features the module
+    does provide: data types that cannot be handled, performance issues
+    and the circumstances in which they may arise, practical
+    limitations on the size of data sets, special cases that are not
+    (yet) handled, etc.
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+    No bugs have been reported.
 
-Alternatively, to install with Module::Build, you can use the following commands:
-
-	perl Build.PL
-	./Build
-	./Build test
-	./Build install
-
-
-DEPENDENCIES
-
-None.
+    Please report any bugs or feature requests to
+    C<bug-religion-bible-regex-reference@rt.cpan.org>, or through the web interface at
+    L<http://rt.cpan.org>.
 
 
-COPYRIGHT AND LICENCE
+    =head1 AUTHOR
 
-Copyright (C) 2009, Daniel Holmlund
+    Daniel Holmlund  C<< <holmlund.dev@gmail.com> >>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+
+    =head1 LICENCE AND COPYRIGHT
+
+    Copyright (c) 2009, Daniel Holmlund C<< <holmlund.dev@gmail.com> >>. All rights reserved.
+
+    This module is free software; you can redistribute it and/or
+    modify it under the same terms as Perl itself. See L<perlartistic>.
+
+

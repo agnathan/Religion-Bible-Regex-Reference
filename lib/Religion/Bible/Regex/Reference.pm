@@ -14,7 +14,7 @@ use Storable qw(store retrieve freeze thaw dclone);
 use Data::Dumper;
 
 use Religion::Bible::Regex::Config;
-use version; our $VERSION = qv('0.91');
+use version; our $VERSION = '0.96';
 
 ##################################################################################
 # Configuration options:
@@ -91,6 +91,8 @@ sub oc   { shift->{'reference'}{'original'}{'c'};  }
 sub oc2  { shift->{'reference'}{'original'}{'c2'}; }
 sub ov   { shift->{'reference'}{'original'}{'v'};  }
 sub ov2  { shift->{'reference'}{'original'}{'v2'}; }
+sub original_text { shift->{'reference'}{'original'}{'text'}; }
+sub original_context { shift->{'reference'}{'original'}{'context'}; }
 
 # We could simply write these functions as 
 # sub s2   { shift->{'reference'}{'spaces'}{'s2'}; }
@@ -154,36 +156,35 @@ sub set_v     {
     my $r = $self->get_regexes;
     return unless (_non_empty($e));
     if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
-	$self->{'reference'}{'data'}{'v'}   = $1 if defined($1);
-	$self->{'reference'}{'data'}{'vletter'} = $2 if defined($2);
+    	$self->{'reference'}{'data'}{'v'}   = $1 if defined($1);
+    	$self->{'reference'}{'data'}{'vletter'} = $2 if defined($2);
     } else {
-	$self->{'reference'}{'data'}{'v'}   = $e;
+    	$self->{'reference'}{'data'}{'v'}   = $e;
     }
     $self->{'reference'}{'original'}{'v'}   = $e; 
 }
 
- sub set_key2  {
+sub set_key2  {
     my $self = shift;
     my $e = shift;
     return unless (_non_empty($e));
     $self->{'reference'}{'data'}{'key2'} = $e; 
 }
 
- sub set_ob  {
+sub set_ob  {
     my $self = shift;
     my $e = shift;
     return unless (_non_empty($e));
     $self->{'reference'}{'original'}{'b'} = $e; 
 }
 
- sub set_ob2  {
+sub set_ob2  {
     my $self = shift;
     my $e = shift;
     return unless (_non_empty($e));
     $self->{'reference'}{'original'}{'b2'} = $e; 
 }
-
-sub set_b     {
+sub set_b {
     my $self = shift;
     my $e = shift;
     return unless (_non_empty($e));
@@ -220,18 +221,32 @@ sub set_v2    {
     my $r = $self->get_regexes;
     return unless (_non_empty($e));
     if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
-	$self->{'reference'}{'data'}{'v2'} = $1 if (defined($1));
-	$self->{'reference'}{'data'}{'v2letter'} = $2 if (defined($1));
+    	$self->{'reference'}{'data'}{'v2'} = $1 if (defined($1));
+    	$self->{'reference'}{'data'}{'v2letter'} = $2 if (defined($1));
     } else {
-	$self->{'reference'}{'data'}{'v2'}   = $e;
+    	$self->{'reference'}{'data'}{'v2'} = $e;
     }
-    $self->{'reference'}{'original'}{'v2'}   = $e;  
+    $self->{'reference'}{'original'}{'v2'} = $e;  
 }
 sub set_context_words  {
     my $self = shift;
     my $e = shift;
     return unless (_non_empty($e));
     $self->{'reference'}{'data'}{'context_words'} = $e; 
+}
+
+sub set_original_text {
+    my $self = shift;
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'original'}{'text'} = $e; 
+}
+
+sub set_original_context {
+    my $self = shift;
+    my $e = shift;
+    return unless (_non_empty($e));
+    $self->{'reference'}{'original'}{'context'} = $e; 
 }
 
 # Setors for spaces
@@ -337,8 +352,8 @@ sub formatted_book2 {
 
     # Check to be sure that book_format has a proper value, if it doesn't then warn and set it
     if (!($book_format eq 'ORIGINAL' || $book_format eq 'CANONICAL_NAME' || $book_format eq 'ABBREVIATION')) {
-	confess "book_format should be either 'ORIGINAL', 'CANONICAL_NAME', 'ABBREVIATION'";
-	$book_format = 'ORIGINAL';
+    	confess "book_format should be either 'ORIGINAL', 'CANONICAL_NAME', 'ABBREVIATION'";
+    	$book_format = 'ORIGINAL';
     }
 
     if ($book_format eq 'ABBREVIATION' || ($book_format eq 'ORIGINAL' && $self->book_type eq 'ABBREVIATION')) {
@@ -364,6 +379,11 @@ sub set {
     # Save the words that provide context
     $self->set_context_words($r->{context_words});
 
+    # Sometimes we need to preserve the context of the reference found in the text
+    # because if we are going to use versification on implicit references, we need to 
+    # add a context to the implicit, do the versification and then return back to that original context 
+    $self->set_original_context($r->{original_context});
+    
     # Set the main part of the reference
     if (defined($r->{key})) {
       $self->set_key($r->{key});   # Key 
@@ -382,7 +402,7 @@ sub set {
       $self->set_b2($r->{b2});   # Match Book
     }
 
-    $self->set_ob2($r->{ob2});   # Chapter
+    $self->set_ob2($r->{ob2});# Chapter
     $self->set_c2($r->{c2});  # Chapter
     $self->set_v2($r->{v2});  # Verse
 
@@ -392,12 +412,15 @@ sub set {
 
     # If this is a book with only one chapter then be sure that chapter is set to '1'
     if(((defined($self->book) && $self->book =~ m/@{[$self->get_regexes->{'livres_avec_un_chapitre'}]}/) ||
-	(defined($self->abbreviation) && $self->abbreviation =~ m/@{[$self->get_regexes->{'livres_avec_un_chapitre'}]}/)) &&
+    	(defined($self->abbreviation) && $self->abbreviation =~ m/@{[$self->get_regexes->{'livres_avec_un_chapitre'}]}/)) &&
        !(defined($self->c) && defined($self->c) && $self->c eq '1')) {
-	$self->set_v($self->c);
-	$self->set_c('1');
-	$self->set_cvs(':');
+        $self->set_v($self->c);
+      	$self->set_c('1');
+      	$self->set_cvs(':');
     }
+
+    # Set the original text
+    $self->set_original_text($r->{original_text});
 
     # Set the spaces
     # Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22
@@ -410,7 +433,6 @@ sub set {
     $self->set_s7($r->{s7});
     $self->set_s8($r->{s8});
     $self->set_s9($r->{s9});
-
 }
 
 ##################################################################################
@@ -429,63 +451,63 @@ sub parse {
     # type: LCVLCV
     if ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
 
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15, s9=>$17, v2=>$18,  context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15, s9=>$17, v2=>$18, context_words=>$context_words, original_text=>$token, original_context => BOOK});
     }   
     
     # Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22
     # type: LCVLC
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {
 	
-	$self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15, context_words=>$context_words });
+	$self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, b2=>$12, s7=>$13, c2=>$14, s8=>$15, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }
 
     # Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22
     # type: LCLCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
 	
-        $self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11, cvs=>$12, s9=>$13, v2=>$14, context_words=>$context_words });
+        $self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11, cvs=>$12, s9=>$13, v2=>$14, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }
 
     # type: LCVCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
 	
-        $self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, c2=>$12, s8=>$13, s9=>$15, v2=>$16, context_words=>$context_words});
+        $self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, c2=>$12, s8=>$13, s9=>$15, v2=>$16, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }
 
     # Ge(s2)1(s3):(s4)1(s5)-(s6)Ap(s7)21(s8):(s9)22
     # type: LCLC
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {
 	
-	$self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11, context_words=>$context_words });
+	$self->set({ b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, b2=>$8, s7=>$9, c2=>$10, s8=>$11, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }
 
     # type: LCCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
         
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, c2=>$8, s8=>$9, cvs=>$10, s9=>$11, v2=>$12, context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, c2=>$8, s8=>$9, cvs=>$10, s9=>$11, v2=>$12, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }  
 
     # type: LCVV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/x) {
         
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, v2=>$12, s7=>$13, context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, dash=>$10, s6=>$11, v2=>$12, s7=>$13, context_words=>$context_words, original_context => BOOK});
     }
 
     # type: LCV
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
         
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, cvs=>$6, s4=>$7, v=>$8, s5=>$9, context_words=>$context_words, original_text => $token, original_context => BOOK});
     } 
 
     # type: LCC
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)/x) {
 	
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, c2=>$8, s7=>$9, context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, dash=>$6, s6=>$7, c2=>$8, s7=>$9, context_words=>$context_words, original_text => $token, original_context => BOOK});
     }
 
     # type: LC
     elsif ($token =~ m/($spaces)($r->{'livres_et_abbreviations'})($spaces)($r->{'chapitre'})($spaces)/x) {        
-        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, context_words=>$context_words});
+        $self->set({b=>$2, s2=>$3, c=>$4, s3=>$5, context_words=>$context_words, original_text => $token, original_context => BOOK});
     } else {
 	$self->parse_chapitre($token, $state, $context_words);
     } 
@@ -506,38 +528,38 @@ sub parse_chapitre {
     # type: CVCV
     if ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, dash=>$8, s6=>$9, c2=>$10, s8=>$11, s9=>$13, v2=>$14, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, dash=>$8, s6=>$9, c2=>$10, s8=>$11, s9=>$13, v2=>$14, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     } 
 
     # type: CCV
     elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)/x) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, dash=>$4, s6=>$5, c2=>$6, s8=>$7, cvs=>$8, s9=>$9, v2=>$10, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, dash=>$4, s6=>$5, c2=>$6, s8=>$7, cvs=>$8, s9=>$9, v2=>$10, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     } 
 
     # type: CVV
     elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'cv_separateur'})($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/x) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, dash=>$8, s6=>$9, v2=>$10, s7=>$11, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, dash=>$8, s6=>$9, v2=>$10, s7=>$11, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     } 
 
     # type: CV
     elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)($r->{'cv_separateur'})([\s ]*)($r->{'verset'})([\s ]*)/x) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, cvs=>$4, s4=>$5, v=>$6, s5=>$7, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     }
 
     # type: CC
     elsif ($token =~ m/($spaces)($r->{'chapitre'})($spaces)($r->{'intervale'})($spaces)($r->{'chapitre'})($spaces)/ && $state eq CHAPTER) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, dash=>$4, s4=>$5, c2=>$6, s7=>$7, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, dash=>$4, s4=>$5, c2=>$6, s7=>$7, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     } 
 
     # type: C
     elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)/ && $state eq CHAPTER) {
 	# elsif ($token =~ m/([\s ]*)($r->{'chapitre'})([\s ]*)/) {
         $state = 'match';
-        $self->set({ s2=>$1, c=>$2, s3=>$3, context_words=>$context_words });
+        $self->set({ s2=>$1, c=>$2, s3=>$3, context_words=>$context_words, original_text => $token, original_context => CHAPTER });
     } 
 
     # Cet un Verset
@@ -562,13 +584,13 @@ sub parse_verset {
     # type: VV
     if ($token =~ m/($spaces)($r->{'verset'})($spaces)($r->{'intervale'})($spaces)($r->{'verset'})($spaces)/ && $state eq VERSE) {
         $state = 'match';
-        $self->set({s2=>$1, v=>$2, s5=>$3, dash=>$4, s6=>$5, v2=>$6, context_words=>$context_words});
+        $self->set({s2=>$1, v=>$2, s5=>$3, dash=>$4, s6=>$5, v2=>$6, context_words=>$context_words, original_text => $token, original_context => VERSE });
     }
     
     # type: V
     elsif ($token =~ m/([\s ]*)($r->{'verset'})([\s ]*)/ && $state eq VERSE) {
         $state = 'match';
-        $self->set({s2=>$1, v=>$2, s5=>$3, context_words=>$context_words});
+        $self->set({s2=>$1, v=>$2, s5=>$3, context_words=>$context_words, original_text => $token, original_context => VERSE});
     } 
 
     # Error
@@ -591,7 +613,6 @@ sub parse_context_words {
     my $header = '';
 
     if ($refstr =~ m/^($r->{'livres_et_abbreviations'})(?:$spaces)(?:$r->{'cv_list'})/) {
-#	$header = $1; $state = BOOK;
 	$state = BOOK;
     } elsif ($refstr =~ m/^($r->{'chapitre_mots'})(?:$spaces)(?:$r->{'cv_list'})/) {
 	$header = $1; $state = CHAPTER;
@@ -693,26 +714,26 @@ sub formatted_normalize {
     my ($book, $book2, $c, $c2) = ('','','','');
 
     if (defined($self->book) && defined($self->book2) || (!(defined($self->v) || defined($self->v2)) && $state eq 'VERSE') ) {
-	$state = 'BOOK';
+    	$state = 'BOOK';
     } elsif (defined($self->c) && defined($self->c2) && $state eq 'VERSE') {
-	$state = 'CHAPTER';
+    	$state = 'CHAPTER';
     }
 
     if (_non_empty($self->formatted_context_words)) {
-	$ret .= $self->formatted_context_words;
-	$ret .= ' ' if defined($self->s2);
+    	$ret .= $self->formatted_context_words;
+    	$ret .= ' ' if defined($self->s2) && (! '(' ne $self->formatted_context_words);
     }
 
     # Write out the context words and the book or abbreviation
     if ($state eq 'BOOK') {	
-	$ret .= $book = $self->formatted_book($book_format);
-	$ret .= ' ' if defined($self->s2) && _non_empty($self->formatted_book($book_format));
+    	$ret .= $book = $self->formatted_book($book_format);
+    	$ret .= ' ' if defined($self->s2) && _non_empty($self->formatted_book($book_format));
     }
 
     # Write out the chapter and the chapter/verse separator
     if ($state eq 'BOOK' || $state eq 'CHAPTER') {
-	$ret .= $c = $self->formatted_c;
-	$ret .= $self->formatted_cvs;
+    	$ret .= $c = $self->formatted_c;
+    	$ret .= $self->formatted_cvs;
     }
 
     # Write out the verse
@@ -720,30 +741,84 @@ sub formatted_normalize {
 
     # Write out the interval character to connect two references as a range of verses
     if ($self->has_interval) {
-	$ret .= '-';	
+    	$ret .= '-';	
 
-	# Write out the second book or abbreviation
-	$book2 = $self->formatted_book2($book_format);
-	$ret .= $book2 if ($book ne $book2);
+      # Write out the second book or abbreviation
+      $book2 = $self->formatted_book2($book_format);
+      $ret .= $book2 if ($book ne $book2);
 
-	# If there is a space defined after book2 and we are not printing the same book twice then ' '
-	$ret .= ' ' if (defined($self->s7) && $book ne $book2);
+      # If there is a space defined after book2 and we are not printing the same book twice then ' '
+      $ret .= ' ' if (defined($self->s7) && $book ne $book2);
 
-	# Write out the chapter
-	$c2 = $self->formatted_c2;
-	$ret .= $c2 if ($c ne $c2);
+      # Write out the chapter
+      $c2 = $self->formatted_c2;
+      $ret .= $c2 if ($c ne $c2);
 
-	# Write out the second chapter/verse separator
-	$ret .= $self->formatted_cvs2 if defined($self->c2) && defined($self->v2) && ($c ne $c2);
+      # Write out the second chapter/verse separator
+      $ret .= $self->formatted_cvs2 if defined($self->c2) && defined($self->v2) && ($c ne $c2);
 
-	# Write out the second verse
-	$ret .= $self->formatted_v2;
+      # Write out the second verse
+      $ret .= $self->formatted_v2;
     }
     return $ret;
 }
 
 # When debugging I don't want to type normalize over and over again
 sub n { return shift->normalize; }
+
+sub logos_strict_reference {
+    my $self = shift;
+
+    # Logos references must be explict because the @ref attribute requires an explicit reference.
+    # The text display for the reference doesn't need to be explicit.  It can be something like 'verse 1'
+    # Ex. <data ref="bible.1.1.1">Genesis 1:1</data> or <data ref="bible.1.1.1">verse 1</data>
+    if ($self->is_explicit) {
+        if ($self->context_is_book) {
+            return "bible:". $self->key .".". $self->c .".". $self->v;
+        } else {
+            return "bible:". $self->key .".". $self->c;
+        }
+    } else {
+        # if the reference is not explicit then return the original text
+        return $self->original_text;
+    }
+}
+
+sub logos {
+    my $self = shift;
+    my $state = shift || '';
+    my $text = shift || $self->original_text || $self->normalize || '';
+    my $regex = $self->context_words;
+    my $ret = '';
+
+    return $text unless ($self->is_explicit);
+
+    $text =~ s/^(?:\Q$regex\E)\s*//g if defined($regex);
+    my $cw = $self->context_words || '';
+
+    # Logos references must be explict because the @ref attribute requires an explicit reference.
+    # The text display for the reference doesn't need to be explicit.  It can be something like 'verse 1'
+    # Ex. <data ref="bible.1.1.1">Genesis 1:1</data> or <data ref="bible.1.1.1">verse 1</data>
+    $ret .= $cw;
+    $ret .= "<data ref=\"bible.";
+    $ret .= $self->key;
+    $ret .= defined( $self->key ) && defined( $self->c ) ? "." : '';
+    $ret .= defined( $self->c ) ? $self->c : '';
+    $ret .= defined( $self->c ) && defined ( $self->v ) ? "." : '';
+    $ret .= defined ( $self->v ) ? $self->v : '';
+    
+    if ($self->has_interval) {
+        $ret .= "-";
+        $ret .= defined( $self->key ) ? (defined( $self->key2) ? $self->key2 : $self->key)  : '';
+        $ret .= defined( $self->key ) && defined( $self->c ) ? "." : '';
+        $ret .= defined( $self->c ) ? (defined( $self->c2 ) ? $self->c2 : $self->c) : '';
+        $ret .= defined( $self->c ) && defined( $self->v ) ? "." : '';
+        $ret .= defined( $self->v ) ? (defined( $self->v2 ) ? $self->v2 : $self->v) : '';
+    }
+    $ret .= "\">". $text ."</data>";
+
+    return $ret; 
+}
 
 sub bol {
     my $self = shift;
@@ -754,25 +829,24 @@ sub bol {
     # These variables are used as caches in this function so we don't need to find there values multiple times
     my ($book, $book2, $c, $c2) = ('','','','');
 
-#   if (defined($self->book) && defined($self->book2) || (!(defined($self->v) || defined($self->v2)) && $state eq 'VERSE') ) {
     if ((!(defined($self->v) || defined($self->v2)) && $state eq 'VERSE')) {
-	$state = 'BOOK';
+    	$state = 'BOOK';
     } elsif (defined($self->c) && defined($self->c2) && $state eq 'VERSE') {
-	$state = 'CHAPTER';
+    	$state = 'CHAPTER';
     }
 
     # Write out the context words and the book or abbreviation
     if ($state eq 'BOOK') {	
-#	$ret .= $self->formatted_context_words($state, $book_format);
-	$ret .= $book = $self->formatted_book($book_format);
-	$ret .= ' ' if defined($self->s2);
+      #	$ret .= $self->formatted_context_words($state, $book_format);
+    	$ret .= $book = $self->formatted_book($book_format);
+    	$ret .= ' ' if defined($self->s2);
     }
 
     # Write out the chapter and the chapter/verse separator
     if ($state eq 'BOOK' || $state eq 'CHAPTER') {
-	$ret .= $c = $self->formatted_c;
-	$ret .= (_non_empty($self->c) && ! _non_empty($self->v) && (_non_empty($self->c2) && ! _non_empty($self->v2)) ) ? $self->cvs || '$' : '';
-	$ret .= $self->formatted_cvs;
+    	$ret .= $c = $self->formatted_c;
+    	$ret .= (_non_empty($self->c) && ! _non_empty($self->v)) ? '$' : '';
+    	$ret .= $self->formatted_cvs;
     }
 
     # Write out the verse
@@ -786,19 +860,19 @@ sub bol {
 
     # Write out the second book or abbreviation
     if ($state eq 'BOOK' && _non_empty($book2) && $book ne $book2) {
-	$ret .= $book2;
+    	$ret .= $book2;
 
-	# If there is a space defined after book2 and we are not printing the same book twice then ' '
-	$ret .= ' ' if (defined($self->s7));
+    	# If there is a space defined after book2 and we are not printing the same book twice then ' '
+    	$ret .= ' ' if (defined($self->s7));
     }
 
     # Write out the chapter
     $c2 = $self->formatted_c2;
     if (_non_empty($c) && $c ne $c2 && ($state eq 'BOOK' || $state eq 'CHAPTER')) {
-	$ret .= $c2;
-	$ret .= (_non_empty($self->c) && ! _non_empty($self->v) && (_non_empty($self->c2) && ! _non_empty($self->v2)) ) ? $self->cvs || '$' : '';
-	# Write out the second chapter/verse separator
-	$ret .= $self->formatted_cvs2;
+     	$ret .= $c2;
+    	$ret .= (_non_empty($self->c2) && ! _non_empty($self->v2)) ? '$' : '';
+    	# Write out the second chapter/verse separator
+    	$ret .= $self->formatted_cvs2;
     }
 
     # Write out the second verse
@@ -828,24 +902,24 @@ sub normalize {
 
     # Write out the interval character to connect two references as a range of verses
     if ($self->has_interval) {
-	$ret .= '-';	
+    	$ret .= '-';	
 
-	# Write out the second book or abbreviation
-	$book2 = $self->formatted_book2('CANONICAL_NAME');
-	$ret .= $book2 if ($book ne $book2);
+    	# Write out the second book or abbreviation
+    	$book2 = $self->formatted_book2('CANONICAL_NAME');
+    	$ret .= $book2 if ($book ne $book2);
 
-	# If there is a space defined after book2 and we are not printing the same book twice then ' '
-	$ret .= ' ' if (defined($self->s7) && $book ne $book2);
+    	# If there is a space defined after book2 and we are not printing the same book twice then ' '
+    	$ret .= ' ' if (defined($self->s7) && $book ne $book2);
 
-	# Write out the chapter
-	$c2 = $self->formatted_c2;
-	$ret .= $c2 if ($c ne $c2);
+    	# Write out the chapter
+    	$c2 = $self->formatted_c2;
+    	$ret .= $c2 if ($c ne $c2);
 
-	# Write out the second chapter/verse separator
-	$ret .= ':' if defined($self->c2) && defined($self->v2) && ($c ne $c2);
-
-	# Write out the second verse
-	$ret .= $self->formatted_v2;
+    	# Write out the second chapter/verse separator
+    	$ret .= ':' if defined($self->c2) && defined($self->v2) && ($c ne $c2);
+  
+    	# Write out the second verse
+    	$ret .= $self->formatted_v2;
     }
     return $ret;
 }
@@ -919,9 +993,9 @@ sub context_is_book {
 
 sub context {
     my $self = shift;
-    return 'BOOK'    if $self->context_is_book;
-    return 'CHAPTER' if $self->context_is_chapitre;
     return 'VERSE'   if $self->context_is_verset;
+    return 'CHAPTER' if $self->context_is_chapitre;
+    return 'BOOK'    if $self->context_is_book;
     return 'UNKNOWN';
 }
 
@@ -979,7 +1053,9 @@ sub begin_interval_reference {
                 s2 => $self->s2, 
                 s3 => $self->s3, s4 => $self->s4, 
                 s5 => $self->s5, cvs => $self->cvs, 
-      	        context_words => $self->context_words});
+      	        context_words => $self->context_words, 
+                original_text => $self->original_text,
+                original_context => $self->original_context});
 
     return $ret;
 }
@@ -1015,7 +1091,9 @@ sub end_interval_reference {
                 s3 => $self->s8, 
                 s4 => $self->s9, 
                 cvs => $self->cvs,
-                context_words => $self->context_words});
+      	        context_words => $self->context_words, 
+                original_text => $self->original_text,
+                original_context => $self->original_context});
 
     return $ret;
 }
@@ -1059,8 +1137,9 @@ sub interval {
                 s7 => $max->s2, 
                 s8 => $max->s3,
                 s9 => $max->s4, 
-                context_words => $min->context_words
-	      });
+      	        context_words => $min->context_words, 
+                original_text => $min->original_text,
+                original_context => $min->original_context});
 
     return $ret;
 }

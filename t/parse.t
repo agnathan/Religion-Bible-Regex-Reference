@@ -69,6 +69,8 @@ CHAPTER
     'original' => {
         'c' => '8',
         'v' => '15',
+        'text' => 'voir 8:15',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -85,28 +87,30 @@ Ge 1:1-Ex 2:5
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'v' => '1',
-	'key2' => '2',
-	'c2' => '2',
-	'v2' => '5',
+        'key' => '1',
+        'c' => '1',
+        'v' => '1',
+        'key2' => '2',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'b'  => 'Ge',
-	'c'  => '1',
-	'v'  => '1',
-	'b2' => 'Ex',	    
-	'c2' => '2',
-	'v2' => '5',
+        'b'  => 'Ge',
+        'c'  => '1',
+        'v'  => '1',
+        'b2' => 'Ex',	    
+        'c2' => '2',
+        'v2' => '5',
+        'text' => 'Ge 1:1-Ex 2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
-	's7' => ' ',
+        's2' => ' ',
+        's7' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 === Parse LCVLCV - Ge 1:1-Ex 2:5
@@ -115,28 +119,30 @@ Ge 1:1-Ex 2:5
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'v' => '1',
-	'key2' => '2',
-	'c2' => '2',
-	'v2' => '5',
+        'key' => '1',
+        'c' => '1',
+        'v' => '1',
+        'key2' => '2',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'b'  => 'Ge',
-	'c'  => '1',
-	'v'  => '1',
-	'b2' => 'Ex',	    
-	'c2' => '2',
-	'v2' => '5',
+        'b'  => 'Ge',
+        'c'  => '1',
+        'v'  => '1',
+        'b2' => 'Ex',	    
+        'c2' => '2',
+        'v2' => '5',
+        'text' => 'Ge 1:1-Ex 2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
-	's7' => ' ',
+        's2' => ' ',
+        's7' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 === Parse LCVLC - Ge 1:5-Ex 2
@@ -145,26 +151,28 @@ Ge 1:5-Ex 2
 --- result eval 
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'v' => '5',
-	'key2' => '2',
-	'c2' => '2',
+        'key' => '1',
+        'c' => '1',
+        'v' => '5',
+        'key2' => '2',
+        'c2' => '2',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
-	'v' => '5',
-	'b2' => 'Ex',
-	'c2' => '2'
+        'b' => 'Ge',
+        'c' => '1',
+        'v' => '5',
+        'b2' => 'Ex',
+        'c2' => '2',
+        'text' => 'Ge 1:5-Ex 2',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
-	's7' => ' ',
+        's2' => ' ',
+        's7' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 
@@ -174,23 +182,25 @@ Ge 1-Ex 2
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'key2' => '2',
-	'c2' => '2',
+        'key' => '1',
+        'c' => '1',
+        'key2' => '2',
+        'c2' => '2',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
-	'b2' => 'Ex',
-	'c2' => '2'
+        'b' => 'Ge',
+        'c' => '1',
+        'b2' => 'Ex',
+        'c2' => '2',
+        'text' => 'Ge 1-Ex 2',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
-	's7' => ' ',
+        's2' => ' ',
+        's7' => ' ',
     },
     'info' => {
-	'dash' => '-',
+        'dash' => '-',
     }
 }
 
@@ -200,15 +210,17 @@ Ge 1
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
+        'key' => '1',
+        'c' => '1',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
+        'b' => 'Ge',
+        'c' => '1',
+        'text' => 'Ge 1',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
 }
 === Parse LCVCV - Ge 1:1-2:5
@@ -217,25 +229,27 @@ Ge 1:1-2:5
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'v' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'key' => '1',
+        'c' => '1',
+        'v' => '1',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
-	'v' => '1',
-	'v2' => '5',
-	'c2' => '2'
+        'b' => 'Ge',
+        'c' => '1',
+        'v' => '1',
+        'v2' => '5',
+        'c2' => '2',
+        'text' => 'Ge 1:1-2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 === Parse LCCV - Ge 1-2:5
@@ -244,23 +258,25 @@ Ge 1-2:5
 --- result eval 
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'key' => '1',
+        'c' => '1',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
-	'v2' => '5',
-	'c2' => '2'
+        'b' => 'Ge',
+        'c' => '1',
+        'v2' => '5',
+        'c2' => '2',
+        'text' => 'Ge 1-2:5',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 
@@ -270,20 +286,22 @@ Ge 1-2
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
-	'c2' => '2',
+        'key' => '1',
+        'c' => '1',
+        'c2' => '2',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
-	'c2' => '2'
+        'b' => 'Ge',
+        'c' => '1',
+        'c2' => '2',
+        'text' => 'Ge 1-2',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'dash' => '-',
+        'dash' => '-',
     }
 }
 
@@ -293,15 +311,17 @@ Ge 1
 --- result eval
 {
     'data' => {
-	'key' => '1',
-	'c' => '1',
+        'key' => '1',
+        'c' => '1',
     },
     'original' => {
-	'b' => 'Ge',
-	'c' => '1',
+        'b' => 'Ge',
+        'c' => '1',
+        'text' => 'Ge 1',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
 }
 
@@ -313,20 +333,22 @@ CHAPTER
 --- result eval
 {
     'data' => {
-	'c' => '1',
-	'v' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'c' => '1',
+        'v' => '1',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'c' => '1',
-	'v' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'c' => '1',
+        'v' => '1',
+        'c2' => '2',
+        'v2' => '5',
+        'text' => '1:1-2:5',
+        'context' => 'CHAPTER',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 === Parse CCV - 1-2:5
@@ -337,18 +359,20 @@ CHAPTER
 --- result eval
 {
     'data' => {
-	'c' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'c' => '1',
+        'c2' => '2',
+        'v2' => '5',
     },
     'original' => {
-	'c' => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'c' => '1',
+        'c2' => '2',
+        'v2' => '5',
+        'text' => '1-2:5',
+        'context' => 'CHAPTER',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
 === Parse CC - 1-2
@@ -359,15 +383,17 @@ CHAPTER
 --- result eval
 {
     'data' => {
-	'c' => '1',
-	'c2' => '2'
+        'c' => '1',
+        'c2' => '2'
     },
     'original' => {
-	'c' => '1',
-	'c2' => '2'
+        'c' => '1',
+        'c2' => '2',
+        'text' => '1-2',
+        'context' => 'CHAPTER',
     },
     'info' => {
-	'dash' => '-',
+        'dash' => '-',
     }
 }
 === Parse C - 2
@@ -378,10 +404,12 @@ CHAPTER
 --- result eval
 {
     'data' => {
-	'c' => '1',
+        'c' => '1',
     },
     'original' => {
-	'c' => '1',
+        'c' => '1',
+        'text' => '1',
+        'context' => 'CHAPTER',
     },
 }
 === Parse VV - 1-2
@@ -392,15 +420,17 @@ VERSE
 --- result eval
 {
     'data' => {
-	'v' => '1',
-	'v2' => '2',
+        'v' => '1',
+        'v2' => '2',
     },
     'original' => {
-	'v' => '1',
-	'v2' => '2',
+        'v' => '1',
+        'v2' => '2',
+        'text' => '1-2',
+        'context' => 'VERSE',
     },
     'info' => {
-	'dash' => '-',
+        'dash' => '-',
     }
 }
 === Parse V - 2
@@ -411,10 +441,12 @@ VERSE
 --- result eval
 {
     'data' => {
-	'v' => '1',
+        'v' => '1',
     },
     'original' => {
-	'v' => '1',
+        'v' => '1',
+        'text' => '1',
+        'context' => 'VERSE',
     }
 }
 === Parse a book that has only one chapter - Jude 4
@@ -425,20 +457,22 @@ VERSE
 --- result eval
 {
     'data' => {
-	'key' => '65',
-	'c' => '1',
-	'v' => '4',
+        'key' => '65',
+        'c' => '1',
+        'v' => '4',
     },
     'original' => {
-	'b'  => 'Jude',
-	'c' => '1',
-	'v'  => '4',
+        'b'  => 'Jude',
+        'c' => '1',
+        'v'  => '4',
+        'text' => 'Jude 4',
+        'context' => 'BOOK',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'cvs' => ':'
+        'cvs' => ':'
     }
 }
 === Parse a book that has only one chapter - Jude 1:4
@@ -457,6 +491,8 @@ VERSE
         'b'  => 'Jude',
         'c' => '1',
         'v'  => '4',
+        'text' => 'Jude 1:4',
+        'context' => 'BOOK',
     },
     'spaces' => {
         's2' => ' ',
@@ -472,51 +508,28 @@ voir 1:1-2:5
 --- result eval
 {
     'data' => {
-	'c' => '1',
-	'v' => '1',
-	'c2' => '2',
-	'v2' => '5',
-	'context_words' => 'voir',
+        'c' => '1',
+        'v' => '1',
+        'c2' => '2',
+        'v2' => '5',
+        'context_words' => 'voir',
     },
     'original' => {
-	'c'  => '1',
-	'v'  => '1',
-	'c2' => '2',
-	'v2' => '5',
+        'c'  => '1',
+        'v'  => '1',
+        'c2' => '2',
+        'v2' => '5',
+        'text' => 'voir 1:1-2:5',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'cvs' =>':',
-	'dash' => '-',
+        'cvs' =>':',
+        'dash' => '-',
     }
 }
-=== Parse CCV - voir aussi 1-2:5
---- reference chomp
-voir aussi 1-2:5
---- result eval
-{
-    'data' => {
-	'c' => '1',
-	'c2' => '2',
-	'v2' => '5',
-	'context_words' => 'voir aussi',
-    },
-    'original' => {
-	'c' => '1',
-	'c2' => '2',
-	'v2' => '5',
-    },
-    'spaces' => {
-	's2' => ' ',
-    },
-    'info' => {
-	'cvs' =>':',
-	'dash' => '-',
-    }
-}
-
 === Parse CCV - voir aussi 1-2:5
 --- reference chomp
 voir aussi 1-2:5
@@ -532,6 +545,8 @@ voir aussi 1-2:5
         'c' => '1',
         'c2' => '2',
         'v2' => '5',
+        'text' => 'voir aussi 1-2:5',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -550,13 +565,15 @@ CHAPTER
 --- result eval
 {
     'data' => {
-	'c' => '8',
-	'v' => '15',
-	'context_words' => 'voir',	
+        'c' => '8',
+        'v' => '15',
+        'context_words' => 'voir',	
     },
     'original' => {
-	'c' => '8',
-	'v' => '15',
+        'c' => '8',
+        'v' => '15',
+        'text' => 'voir 8:15',
+        'context' => 'CHAPTER',
     },
     'spaces' => {
         's2' => ' ',
@@ -575,19 +592,21 @@ VERSE
 --- result eval
 {
     'data' => {
-	'v' => '1',
-	'v2' => '2',
-	'context_words' => 'vv.',	
+        'v' => '1',
+        'v2' => '2',
+        'context_words' => 'vv.',	
     },
     'original' => {
-	'v' => '1',
-	'v2' => '2',
+        'v' => '1',
+        'v2' => '2',
+        'text' => 'vv. 1-2',
+        'context' => 'VERSE',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
     'info' => {
-	'dash' => '-',
+        'dash' => '-',
     }
 }
 
@@ -599,13 +618,15 @@ VERSE
 --- result eval
 {
     'data' => {
-	'v' => '1',
-	'context_words' => 'voir aussi v.',
+        'v' => '1',
+        'context_words' => 'voir aussi v.',
     },
     'original' => {
-	'v' => '1',
+        'v' => '1',
+        'text' => 'voir aussi v. 1',
+        'context' => 'VERSE',
     },
     'spaces' => {
-	's2' => ' ',
+        's2' => ' ',
     },
 }
