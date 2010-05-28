@@ -155,7 +155,7 @@ sub set_v     {
 
     my $r = $self->get_regexes;
     return unless (_non_empty($e));
-    if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
+    if ($e =~ m/($r->{'verse_number'})($r->{'verset_letter'})/) {
     	$self->{'reference'}{'data'}{'v'}   = $1 if defined($1);
     	$self->{'reference'}{'data'}{'vletter'} = $2 if defined($2);
     } else {
@@ -220,7 +220,7 @@ sub set_v2    {
 
     my $r = $self->get_regexes;
     return unless (_non_empty($e));
-    if ($e =~ m/($r->{'verse_number'})($r->{'verse_letter'})/) {
+    if ($e =~ m/($r->{'verse_number'})($r->{'verset_letter'})/) {
     	$self->{'reference'}{'data'}{'v2'} = $1 if (defined($1));
     	$self->{'reference'}{'data'}{'v2letter'} = $2 if (defined($1));
     } else {
