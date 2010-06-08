@@ -845,7 +845,7 @@ sub bol {
     # Write out the chapter and the chapter/verse separator
     if ($state eq 'BOOK' || $state eq 'CHAPTER') {
     	$ret .= $c = $self->formatted_c;
-    	$ret .= (_non_empty($self->c) && ! _non_empty($self->v)) ? '$' : '';
+    	$ret .= (_non_empty($self->c) && !$self->is_explicit && ! _non_empty($self->v)) ? '$' : '';
     	$ret .= $self->formatted_cvs;
     }
 
@@ -870,7 +870,7 @@ sub bol {
     $c2 = $self->formatted_c2;
     if (_non_empty($c) && $c ne $c2 && ($state eq 'BOOK' || $state eq 'CHAPTER')) {
      	$ret .= $c2;
-    	$ret .= (_non_empty($self->c2) && ! _non_empty($self->v2)) ? '$' : '';
+    	$ret .= (_non_empty($self->c2) && !$self->is_explicit && ! _non_empty($self->v2)) ? '$' : '';
     	# Write out the second chapter/verse separator
     	$ret .= $self->formatted_cvs2;
     }
